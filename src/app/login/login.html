@@ -1,0 +1,100 @@
+<div class="container mt-4 text-light">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      
+      <div class="p-4 rounded shadow" style="background-color: #141417; border: 1px solid #333;">
+        
+        <!-- Controle de navegacao entre as interfaces de autenticacao e registro -->
+        <div class="d-flex justify-content-around mb-4 pb-3" style="border-bottom: 2px solid var(--rust-red);">
+          <button class="btn fw-bold fs-5 text-uppercase" [class.text-white]="!modoCadastro" [class.text-muted]="modoCadastro" (click)="modoCadastro = false" style="background: none; border: none;">
+            Já tenho cadastro
+          </button>
+          <span class="text-secondary fs-4">|</span>
+          <button class="btn fw-bold fs-5 text-uppercase" [class.text-white]="modoCadastro" [class.text-muted]="!modoCadastro" (click)="modoCadastro = true" style="background: none; border: none;">
+            Criar Conta
+          </button>
+        </div>
+
+        <!-- Renderizacao estrutural do formulario de autenticacao de usuarios -->
+        <div *ngIf="!modoCadastro">
+          <form [formGroup]="loginForm" (ngSubmit)="fazerLogin()">
+            <div class="mb-3">
+              <label class="form-label text-muted">E-mail de Acesso</label>
+              <input type="email" formControlName="email" class="form-control bg-dark text-white border-secondary" placeholder="exemplo@grimdark.com" [class.is-invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+              <div class="invalid-feedback text-danger mt-1">Insira um e-mail válido para acessar as criptas.</div>
+            </div>
+            
+            <!-- Grupo de entrada da senha contendo controle visual dinâmico -->
+            <div class="mb-3">
+              <label class="form-label text-muted">Senha</label>
+              <div class="input-group">
+                <input [type]="mostrarSenhaLogin ? 'text' : 'password'" formControlName="senha" class="form-control bg-dark text-white border-secondary" placeholder="******" [class.is-invalid]="loginForm.get('senha')?.invalid && loginForm.get('senha')?.touched">
+                <button class="btn btn-outline-secondary" type="button" style="border-color: #555;" (click)="alternarSenhaLogin()">
+                  <i class="bi" [class.bi-eye]="!mostrarSenhaLogin" [class.bi-eye-slash]="mostrarSenhaLogin"></i>
+                </button>
+              </div>
+              <div class="invalid-feedback text-danger mt-1">A senha requer no mínimo 6 caracteres.</div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <a routerLink="/esqueci" class="text-decoration-none small" style="color: var(--rust-red);">Esqueci minha senha</a>
+            </div>
+
+            <!-- Controle de submissao bloqueado enquanto os criterios de validacao nao forem atendidos -->
+            <button type="submit" class="btn btn-grimdark w-100 py-2 fw-bold text-uppercase" [disabled]="loginForm.invalid">Entrar</button>
+          </form>
+        </div>
+
+        <!-- Renderizacao estrutural do formulario de registro de novos usuarios -->
+        <div *ngIf="modoCadastro">
+          <form [formGroup]="cadastroForm" (ngSubmit)="fazerCadastro()">
+            <div class="mb-3">
+              <label class="form-label text-muted">Nome Completo</label>
+              <input type="text" formControlName="nome" class="form-control bg-dark text-white border-secondary" placeholder="Seu nome" [class.is-invalid]="cadastroForm.get('nome')?.invalid && cadastroForm.get('nome')?.touched">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label text-muted">E-mail</label>
+              <input type="email" formControlName="email" class="form-control bg-dark text-white border-secondary" placeholder="seu@email.com" [class.is-invalid]="cadastroForm.get('email')?.invalid && cadastroForm.get('email')?.touched">
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">Senha</label>
+                <div class="input-group">
+                  <input [type]="mostrarSenhaCadastro ? 'text' : 'password'" formControlName="senha" class="form-control bg-dark text-white border-secondary" placeholder="Mínimo 6 dígitos" [class.is-invalid]="cadastroForm.get('senha')?.invalid && cadastroForm.get('senha')?.touched">
+                  <button class="btn btn-outline-secondary" type="button" style="border-color: #555;" (click)="alternarSenhaCadastro()">
+                    <i class="bi" [class.bi-eye]="!mostrarSenhaCadastro" [class.bi-eye-slash]="mostrarSenhaCadastro"></i>
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Campo com restricao fisica de limite de caracteres e vinculacao de evento de filtragem logica -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label text-muted">CPF</label>
+                <input type="text" formControlName="cpf" 
+                       class="form-control bg-dark text-white border-secondary" 
+                       placeholder="000.000.000-00" maxlength="14" 
+                       (input)="filtrarCpf($event)" 
+                       [class.is-invalid]="cadastroForm.get('cpf')?.invalid && cadastroForm.get('cpf')?.touched">
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label text-muted">Telefone</label>
+              <!-- Campo com restricao fisica de limite de caracteres e vinculacao de evento de filtragem logica -->
+              <input type="text" formControlName="telefone" 
+                     class="form-control bg-dark text-white border-secondary" 
+                     placeholder="(11) 90000-0000" maxlength="15" 
+                     (input)="filtrarTelefone($event)" 
+                     [class.is-invalid]="cadastroForm.get('telefone')?.invalid && cadastroForm.get('telefone')?.touched">
+            </div>
+
+            <button type="submit" class="btn btn-grimdark w-100 py-2 fw-bold text-uppercase" [disabled]="cadastroForm.invalid">Cadastrar</button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

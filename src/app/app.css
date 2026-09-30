@@ -1,0 +1,20 @@
+/* ======================================================= */
+/* ESTILIZACAO DO MENU DE CATEGORIAS                       */
+/* ======================================================= */
+
+/* Definicao do estado base dos links de navegacao inferior */
+.nav-categoria {
+  color: #b5b5be !important;
+  letter-spacing: 1.5px;
+  border-bottom: 2px solid transparent;
+  padding-bottom: 4px;
+  transition: all 0.3s ease-in-out;
+}
+
+/* Configuracao de estado interativo (hover) com aplicacao de realce e elevacao virtual */
+.nav-categoria:hover {
+  color: var(--rust-red, #8a2522) !important;
+  border-bottom: 2px solid var(--rust-red, #8a2522);
+  text-shadow: 0px 0px 8px rgba(138, 37, 34, 0.6);
+  transform: translateY(-2px);
+}

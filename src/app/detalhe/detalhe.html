@@ -1,0 +1,95 @@
+<!-- Renderizacao condicional da estrutura principal baseada na presenca de dados do produto no escopo -->
+<div class="container mt-5 text-light" *ngIf="produto">
+  
+  <!-- Trilha de navegacao (breadcrumb) para orientacao espacial do usuario no sistema -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a routerLink="/inicio" class="text-decoration-none" style="color: var(--rust-red);">Catálogo</a></li>
+      <li class="breadcrumb-item active text-muted" aria-current="page">{{ produto.nome }}</li>
+    </ol>
+  </nav>
+
+  <div class="row align-items-start">
+    
+    <!-- Secao esquerda: Apresentacao visual e detalhamento tecnico do produto -->
+    <div class="col-lg-8 mb-4">
+      
+      <!-- Container de exibicao da midia principal associada ao item -->
+      <div class="position-relative mb-4">
+        <img [src]="produto.codigo + '.jpg'" class="img-fluid rounded shadow w-100" alt="Capa do Jogo" style="max-height: 450px; object-fit: cover; border: 1px solid #333;">
+      </div>
+
+      <!-- Bloco de informacoes descritivas e especificacoes tecnicas -->
+      <div class="p-4 rounded shadow-sm" style="background-color: #141417; border: 1px solid #333;">
+        <h4 class="fw-bold mb-3 pb-2" style="color: var(--text-main); border-bottom: 1px solid var(--rust-red);">
+          Sobre o Artefato
+        </h4>
+        
+        <!-- Renderizacao da descricao detalhada do produto -->
+        <p class="mb-4" style="color: var(--text-muted-grimdark); line-height: 1.6; font-size: 1.1rem;">
+          {{ produto.descritivo }}
+        </p>
+
+        <!-- Grade de atributos estruturados com dados complementares -->
+        <div class="row pt-3" style="border-top: 1px solid #222;">
+          <div class="col-md-4 mb-3">
+            <span class="d-block text-muted small fw-bold text-uppercase">Desenvolvedora</span>
+            <!-- Tratamento de valor padrao para atributo nao especificado na fonte de dados -->
+            <span style="color: #e0e0e0;">{{ produto.desenvolvedora || 'Não informada' }}</span>
+          </div>
+          <div class="col-md-4 mb-3">
+            <span class="d-block text-muted small fw-bold text-uppercase">Categoria</span>
+            <span style="color: #e0e0e0;">{{ produto.categoria || 'Não classificado' }}</span>
+          </div>
+          <div class="col-md-4 mb-3">
+            <span class="d-block text-muted small fw-bold text-uppercase">Plataforma / Resgate</span>
+            <span style="color: #e0e0e0;">
+              <i class="bi bi-key-fill text-secondary me-1"></i> {{ produto.plataforma || 'Chave Digital' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Secao direita: Painel de precificacao e acoes de conversao -->
+    <div class="col-lg-4 sticky-lg-top" style="top: 2rem;">
+      <div class="p-4 rounded shadow" style="background-color: #0a0a0c; border: 1px solid #333;">
+        
+        <h2 class="fw-bold mb-1" style="color: var(--text-main); font-size: 2rem;">{{ produto.nome }}</h2>
+        <p class="text-secondary small mb-4">Quantidade no arsenal: {{ produto.quantidade }} unidades</p>
+        
+        <!-- Estrutura de apresentacao dos valores financeiros -->
+        <div class="p-3 mb-4 rounded" style="background-color: #141417; border: 1px dashed #444;">
+          <!-- Renderizacao condicional para itens com desconto financeiro aplicado -->
+          <div *ngIf="produto.promo > 0">
+            <span class="text-decoration-line-through text-muted fs-6 d-block">De: R$ {{ produto.valor | number:'1.2-2' }}</span>
+            <span class="fw-bold d-block" style="color: var(--rust-red); font-size: 2.2rem;">R$ {{ produto.promo | number:'1.2-2' }}</span>
+          </div>
+          
+          <!-- Renderizacao condicional para itens comercializados pelo valor integral -->
+          <div *ngIf="produto.promo <= 0">
+            <span class="fw-bold d-block" style="color: var(--text-main); font-size: 2.2rem;">R$ {{ produto.valor | number:'1.2-2' }}</span>
+          </div>
+        </div>
+        
+        <!-- Controles de interacao condicionados a disponibilidade de estoque -->
+        <button class="btn btn-grimdark btn-lg w-100 mb-3 py-3 fw-bold text-uppercase" *ngIf="produto.quantidade > 0" (click)="adicionarCesta(produto)">
+          <i class="bi bi-cart-plus me-2"></i> Adicionar à Cesta
+        </button>
+        
+        <button class="btn btn-dark border-secondary btn-lg w-100 mb-3 py-3 fw-bold text-uppercase text-muted" *ngIf="produto.quantidade <= 0" disabled>
+          <i class="bi bi-x-circle me-2"></i> Indisponível
+        </button>
+        
+        <a routerLink="/inicio" class="btn btn-outline-secondary w-100 py-2">Explorar mais itens</a>
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+<!-- Tratamento de excecao visual para acesso direto a rota sem contexto de produto valido na memoria -->
+<div class="container mt-5 text-center text-light" *ngIf="!produto">
+  <h3 class="mb-4">Nenhum artefato foi selecionado.</h3>
+  <a routerLink="/inicio" class="btn btn-grimdark"><i class="bi bi-arrow-left me-2"></i> Voltar ao Catálogo</a>
+</div>

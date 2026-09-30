@@ -1,0 +1,45 @@
+<div class="container mt-5 text-light">
+  
+  <!-- Cabecalho da biblioteca com a contagem total de itens adquiridos -->
+  <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3" style="border-color: var(--rust-red) !important;">
+    <h2 class="fw-bold m-0" style="color: var(--text-main);">
+      <i class="bi bi-collection-play me-2 text-muted"></i> Meu Arsenal
+    </h2>
+    <span class="badge bg-dark border border-secondary fs-6 p-2">{{ jogosAdquiridos.length }} Artefatos</span>
+  </div>
+
+  <!-- Renderizacao do estado vazio caso o historico de compras do usuario seja nulo -->
+  <div class="text-center py-5" *ngIf="jogosAdquiridos.length === 0">
+    <i class="bi bi-journal-x display-1 text-muted mb-3 d-block"></i>
+    <h4 class="text-secondary mb-4">Sua biblioteca está vazia. O abismo aguarda sua primeira aquisição.</h4>
+    <a routerLink="/inicio" class="btn btn-grimdark btn-lg">Explorar Catálogo</a>
+  </div>
+
+  <!-- Estrutura de repeticao para renderizar a grade de produtos iterando sobre o vetor de aquisicoes -->
+  <div class="row" *ngIf="jogosAdquiridos.length > 0">
+    <div class="col-md-6 col-lg-4 mb-4" *ngFor="let item of jogosAdquiridos">
+      
+      <!-- Container do cartao de detalhamento do produto -->
+      <div class="card bg-dark text-white h-100 shadow" style="border: 1px solid #333;">
+        <img [src]="item.produto.codigo + '.jpg'" class="card-img-top" alt="Capa" style="height: 180px; object-fit: cover; border-bottom: 2px solid var(--rust-red);">
+        
+        <div class="card-body" style="background-color: #0a0a0c;">
+          <h5 class="card-title fw-bold text-truncate" [title]="item.produto.nome">{{ item.produto.nome }}</h5>
+          <p class="small text-muted mb-3">Adquirido em: {{ item.dataCompra }}</p>
+          
+          <!-- Secao de formatacao visual para a exibicao da chave de ativacao digital -->
+          <div class="p-3 rounded" style="background-color: #141417; border: 1px dashed #555;">
+            <span class="d-block small fw-bold text-muted text-uppercase mb-1">Chave de Ativação ({{ item.produto.plataforma }})</span>
+            
+            <div class="d-flex align-items-center bg-black p-2 rounded border border-secondary">
+              <i class="bi bi-key-fill text-warning me-2"></i>
+              <span class="font-monospace fw-bold text-white fs-6 letter-spacing-1">{{ item.chaveDigital }}</span>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,77 @@
+/* Importação do Bootstrap e dos Ícones do Bootstrap */
+@import "bootstrap/dist/css/bootstrap.min.css";
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css");
+
+/* Importação de fonte externa (Google Fonts) para tipografia temática */
+@import url('https://fonts.googleapis.com/css2?family=Metal+Mania&display=swap');
+
+/* Aplicação restrita a cabeçalhos e elementos de destaque para preservar a legibilidade estrutural */
+h1, h2, h3, h4, h5, .nav-categoria, .navbar-brand {
+  font-family: 'Metal Mania', system-ui, cursive !important;
+  letter-spacing: 1px;
+}
+
+/* Ajuste específico para a logo em texto do cabeçalho */
+.navbar-brand {
+  font-size: 1.8rem !important;
+  color: var(--rust-red) !important;
+}
+
+/* Variáveis de cor do tema Grimdark Sci-Fi */
+:root {
+  --bg-grimdark: #0a0a0c; /* Fundo principal quase preto */
+  --bg-navbar: #141417; /* Fundo do menu um pouco mais claro */
+  --rust-red: #8a2522; /* Vermelho ferrugem estilo Darktide */
+  --rust-red-hover: #a6302c; /* Vermelho ferrugem mais claro para hover */
+  --text-main: #e0e0e0; /* Cinza bem claro para títulos e textos principais */
+  --text-muted-grimdark: #b5b5be; /* Cinza metálico claro para rótulos e textos pequenos */
+}
+
+/* Estilos Globais da Página */
+body {
+  background-color: var(--bg-grimdark);
+  color: var(--text-main);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Personalização genérica de botões principais do tema */
+.btn-grimdark {
+  background-color: var(--rust-red);
+  color: #fff;
+  border: 1px solid #5a1512;
+  transition: all 0.3s ease;
+}
+
+.btn-grimdark:hover {
+  background-color: var(--rust-red-hover);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(138, 37, 34, 0.6);
+}
+
+/* Sobrescrevendo classes utilitárias do Bootstrap para garantir legibilidade no tema escuro */
+.text-muted {
+  color: var(--text-muted-grimdark) !important;
+}
+
+.form-label {
+  color: var(--text-muted-grimdark) !important;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* ======================================================= */
+/* EFEITO DE ILUMINAÇÃO DO SUBMUNDO (Fundo Global)         */
+/* ======================================================= */
+
+/* Aplica um gradiente linear fixo no corpo da página para simular luz ambiente. */
+body {
+  min-height: 100vh;
+  margin: 0;
+  
+  /* O gradiente avança de baixo para cima (to top). 
+     Começa em vermelho sangue escuro (#3a0404) e transiciona para o preto padrão (#0a0a0c) na metade da tela. */
+  background: linear-gradient(to top, #3a0404 0%, #0a0a0c 40%, #0a0a0c 100%) !important;
+  
+  /* Mantém a origem da luz fixa no rodapé do navegador durante a rolagem de conteúdo */
+  background-attachment: fixed !important;
+}

@@ -1,0 +1,56 @@
+<div class="container mt-5 text-light">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="p-5 rounded shadow text-center" style="background-color: #141417; border: 1px solid #333;">
+        
+        <!-- Renderizacao estrutural da primeira etapa: formulario de solicitacao de codigo de recuperacao -->
+        <div *ngIf="etapa === 1">
+          <h3 class="fw-bold mb-3" style="color: var(--text-main);">Recuperação de Acesso</h3>
+          <p class="text-muted mb-4">Informe o seu e-mail cadastrado para receber o código de redefinição de credenciais nas criptas.</p>
+          
+          <form [formGroup]="recuperacaoForm" (ngSubmit)="enviarEmail()">
+            <div class="mb-4 text-start">
+              <input type="email" formControlName="email" class="form-control bg-dark text-white border-secondary py-2" placeholder="seu@email.com" [class.is-invalid]="recuperacaoForm.get('email')?.invalid && recuperacaoForm.get('email')?.touched">
+              <div class="invalid-feedback text-danger mt-1">E-mail obrigatório para o resgate.</div>
+            </div>
+
+            <button type="submit" class="btn btn-grimdark w-100 py-2 fw-bold text-uppercase mb-3" [disabled]="recuperacaoForm.invalid">Gerar Código</button>
+          </form>
+        </div>
+
+        <!-- Renderizacao estrutural da segunda etapa: validacao do codigo e atualizacao de credencial -->
+        <div *ngIf="etapa === 2">
+          <h3 class="fw-bold mb-3" style="color: var(--text-main);">Forjar Nova Senha</h3>
+          <p class="text-muted mb-4">Insira o código de segurança gerado para <strong style="color: var(--rust-red);">{{ emailAlvo }}</strong> e sua nova senha.</p>
+          
+          <form [formGroup]="redefinicaoForm" (ngSubmit)="redefinirSenha()">
+            
+            <!-- Campo de entrada para o identificador de seguranca -->
+            <div class="mb-3 text-start">
+              <label class="form-label text-muted">Código de Segurança</label>
+              <input type="text" formControlName="codigo" class="form-control bg-dark text-white border-secondary text-uppercase fw-bold text-center letter-spacing-2" placeholder="EX: A7X9WQ" [class.is-invalid]="redefinicaoForm.get('codigo')?.invalid && redefinicaoForm.get('codigo')?.touched">
+            </div>
+
+            <!-- Agrupamento de campos para definicao e confirmacao da nova senha -->
+            <div class="row text-start mb-4">
+              <div class="col-md-6 mb-3 mb-md-0">
+                <label class="form-label text-muted">Nova Senha</label>
+                <input type="password" formControlName="novaSenha" class="form-control bg-dark text-white border-secondary" placeholder="Mínimo 6 dígitos" [class.is-invalid]="redefinicaoForm.get('novaSenha')?.invalid && redefinicaoForm.get('novaSenha')?.touched">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label text-muted">Confirmar Senha</label>
+                <input type="password" formControlName="confirmarSenha" class="form-control bg-dark text-white border-secondary" placeholder="Repita a senha" [class.is-invalid]="redefinicaoForm.errors?.['senhasDiferentes'] && redefinicaoForm.get('confirmarSenha')?.touched">
+                <div class="invalid-feedback text-danger mt-1" *ngIf="redefinicaoForm.errors?.['senhasDiferentes']">As senhas não coincidem.</div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-grimdark w-100 py-2 fw-bold text-uppercase mb-3" [disabled]="redefinicaoForm.invalid">Confirmar Redefinição</button>
+            <button type="button" class="btn btn-outline-secondary w-100 py-2 mb-3" (click)="etapa = 1">Cancelar e Voltar</button>
+          </form>
+        </div>
+
+        <a routerLink="/login" class="text-decoration-none text-muted small">Voltar ao Login</a>
+      </div>
+    </div>
+  </div>
+</div>

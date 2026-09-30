@@ -1,0 +1,105 @@
+<!-- ======================================================= -->
+<!-- CABECALHO PRINCIPAL DA APLICACAO                        -->
+<!-- ======================================================= -->
+<header class="py-3" style="background-color: var(--bg-navbar); border-bottom: 2px solid var(--rust-red);">
+  <div class="container d-flex flex-wrap align-items-center justify-content-between">
+    
+    <!-- Vinculo de redirecionamento para o componente inicial do catalogo -->
+    <a routerLink="/inicio" class="d-flex align-items-center text-decoration-none text-white">
+      <img src="logo.png" alt="Logo Grimdark Cave" style="height: 55px; width: auto; object-fit: contain;" class="me-2">
+      <span class="d-none d-sm-inline navbar-brand m-0 p-0" style="color: var(--rust-red);">GRIMDARK CAVE</span>
+    </a>
+
+    <!-- Formulario de captura textual interligado ao motor de pesquisa global -->
+    <form class="d-flex w-50 mx-3" (ngSubmit)="realizarBusca()">
+      <div class="input-group">
+        <input type="search" [(ngModel)]="termoPesquisa" name="termoPesquisa" class="form-control bg-dark text-white border-secondary" placeholder="Buscar no grimdark..." aria-label="Search">
+        <button class="btn btn-grimdark" type="submit">
+          <i class="bi bi-search"></i>
+        </button>
+      </div>
+    </form>
+
+    <!-- Bloco de navegacao utilitaria e controle de sessoes -->
+    <div class="d-flex align-items-center gap-3">
+      
+      <!-- Controle fixo para redirecionamento ao componente do carrinho -->
+      <a routerLink="/cesta" class="btn btn-dark border-secondary text-light px-3 py-1 text-decoration-none">
+        <i class="bi bi-cart3 fs-5 me-1" style="color: var(--rust-red);"></i>
+        <span>Cesta</span>
+      </a>
+
+      <!-- Renderizacao estrutural condicional: Visivel apenas se a sessao for nula -->
+      <ng-container *ngIf="!usuarioLogado">
+        <a routerLink="/login" class="text-white text-decoration-none fs-4" title="Login / Cadastro">
+          <i class="bi bi-person-circle"></i>
+        </a>
+      </ng-container>
+
+      <!-- Renderizacao estrutural condicional: Visivel apenas se a sessao estiver ativa -->
+      <ng-container *ngIf="usuarioLogado">
+        <div class="d-flex align-items-center gap-3">
+          
+          <!-- Elemento de confirmacao visual de sessao autenticada -->
+          <span class="text-muted small d-none d-md-inline" style="color: var(--text-muted-grimdark);">
+            <i class="bi bi-person-check-fill" style="color: var(--rust-red);"></i> {{ usuarioLogado }}
+          </span>
+          
+          <!-- Redirecionamento restrito a area logada -->
+          <a routerLink="/biblioteca" class="btn btn-sm btn-outline-light" title="Acessar meu arsenal">
+            <i class="bi bi-collection-play"></i> Biblioteca
+          </a>
+
+          <!-- Despachante de encerramento de sessao local -->
+          <button class="btn btn-sm btn-outline-danger" (click)="sair()" title="Sair das criptas">
+            <i class="bi bi-box-arrow-right"></i> Sair
+          </button>
+        </div>
+      </ng-container>
+    </div>
+
+  </div>
+</header>
+
+<!-- ======================================================= -->
+<!-- BARRA DE NAVEGACAO INFERIOR E FILTROS DE CATEGORIA      -->
+<!-- ======================================================= -->
+<nav class="py-3" style="background-color: #0a0a0c; border-bottom: 1px solid #1a1a1a; box-shadow: 0 4px 6px rgba(0,0,0,0.5);">
+  <div class="container d-flex justify-content-center">
+    <ul class="nav gap-4">
+      
+      <li class="nav-item">
+        <a routerLink="/inicio" class="nav-link nav-categoria text-uppercase fw-bold">
+          <i class="bi bi-house-door-fill me-1"></i> Início
+        </a>
+      </li>
+      
+      <!-- Modulos de redirecionamento parametrizado para alimentacao do componente de busca -->
+      <li class="nav-item">
+        <a routerLink="/busca" [queryParams]="{categoria: 'Warhammer'}" class="nav-link nav-categoria text-uppercase fw-bold">
+          <i class="bi bi-hammer me-1"></i> Warhammer
+        </a>
+      </li>
+      
+      <li class="nav-item">
+        <a routerLink="/busca" [queryParams]="{categoria: 'Souls-like'}" class="nav-link nav-categoria text-uppercase fw-bold">
+          <i class="bi bi-fire me-1"></i> Souls-like
+        </a>
+      </li>
+      
+      <li class="nav-item">
+        <a routerLink="/busca" [queryParams]="{categoria: 'Sci-Fi Horror'}" class="nav-link nav-categoria text-uppercase fw-bold">
+          <i class="bi bi-bug-fill me-1"></i> Sci-Fi Horror
+        </a>
+      </li>
+      
+    </ul>
+  </div>
+</nav>
+
+<!-- ======================================================= -->
+<!-- RECEPTACULO PARA INJECAO DINAMICA DE ROTAS              -->
+<!-- ======================================================= -->
+<main class="container my-5">
+  <router-outlet></router-outlet>
+</main>
