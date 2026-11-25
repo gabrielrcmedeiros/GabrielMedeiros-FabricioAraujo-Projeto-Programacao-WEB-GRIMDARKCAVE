@@ -1,8 +1,32 @@
-/* ======================================================= */
-/* ESTILIZACAO DO MENU DE CATEGORIAS                       */
-/* ======================================================= */
+/* Cabeçalho */
+.cabecalho {
+  background-color: var(--bg-navbar);
+  border-bottom: 2px solid var(--rust-red);
+}
 
-/* Definicao do estado base dos links de navegacao inferior */
+.logo {
+  height: 55px;
+  width: auto;
+  object-fit: contain;
+}
+
+.busca-topo {
+  max-width: 560px;
+}
+
+.contador-cesta {
+  background-color: var(--rust-red);
+  font-size: 0.7rem;
+}
+
+/* Menu de categorias */
+.barra-categorias {
+  background-color: #0a0a0c;
+  border-bottom: 1px solid #1a1a1a;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+}
+
+/* Link de categoria */
 .nav-categoria {
   color: #b5b5be !important;
   letter-spacing: 1.5px;
@@ -11,10 +35,74 @@
   transition: all 0.3s ease-in-out;
 }
 
-/* Configuracao de estado interativo (hover) com aplicacao de realce e elevacao virtual */
-.nav-categoria:hover {
-  color: var(--rust-red, #8a2522) !important;
-  border-bottom: 2px solid var(--rust-red, #8a2522);
+/* Link em foco ou da rota ativa */
+.nav-categoria:hover,
+.nav-categoria.active {
+  color: var(--rust-red-hover) !important;
+  border-bottom: 2px solid var(--rust-red);
   text-shadow: 0px 0px 8px rgba(138, 37, 34, 0.6);
   transform: translateY(-2px);
+}
+
+/* Rodapé */
+.rodape {
+  background-color: rgba(10, 10, 12, 0.85);
+  border-top: 1px solid #2a1414;
+  color: var(--text-muted-grimdark);
+}
+
+/* Telas menores */
+
+/* Busca em linha própria, abaixo do logo e dos botões */
+@media (max-width: 991.98px) {
+  .busca-topo {
+    order: 3;
+    flex-basis: 100%;
+    max-width: none;
+  }
+}
+
+/* Categorias em uma linha, com rolagem horizontal */
+@media (max-width: 767.98px) {
+  .barra-categorias .nav {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start !important;
+    min-width: 0;
+    max-width: 100%;
+    padding: 4px 0;
+    scrollbar-width: none;
+  }
+
+  .barra-categorias .nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-categoria {
+    white-space: nowrap;
+  }
+}
+
+/* Celular: cabeçalho e menu mais compactos */
+@media (max-width: 575.98px) {
+  .cabecalho {
+    padding-top: 0.6rem !important;
+    padding-bottom: 0.6rem !important;
+  }
+
+  .logo {
+    height: 42px;
+  }
+
+  .barra-categorias {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+
+  .nav-categoria {
+    letter-spacing: 0.5px;
+    font-size: 0.95rem;
+    padding-left: 0.6rem;
+    padding-right: 0.6rem;
+  }
 }

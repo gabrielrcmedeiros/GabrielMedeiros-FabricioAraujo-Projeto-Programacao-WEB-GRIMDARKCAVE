@@ -1,0 +1,148 @@
+/* Banner de destaques */
+.hero {
+  position: relative;
+  min-height: 380px;
+  border-radius: 0.75rem;
+  border: 1px solid #3a1a18;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+/* Degradê para leitura do texto */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(10, 10, 12, 0.95) 0%, rgba(10, 10, 12, 0.75) 45%, rgba(10, 10, 12, 0.15) 100%);
+}
+
+.hero-conteudo {
+  position: relative;
+  max-width: 640px;
+}
+
+.hero-texto {
+  font-size: 1.05rem;
+}
+
+.hero-badge {
+  background-color: rgba(138, 37, 34, 0.85);
+  letter-spacing: 1px;
+}
+
+.hero-seta {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid #555;
+  background: rgba(10, 10, 12, 0.6);
+  color: #fff;
+}
+
+.hero-seta:hover {
+  border-color: var(--rust-red-hover);
+  background: rgba(138, 37, 34, 0.7);
+}
+
+.hero-seta-esq {
+  left: 12px;
+}
+
+.hero-seta-dir {
+  right: 12px;
+}
+
+.hero-indicadores {
+  position: absolute;
+  bottom: 14px;
+  right: 20px;
+  display: flex;
+  gap: 6px;
+}
+
+.hero-indicadores button {
+  width: 26px;
+  height: 5px;
+  border: 0;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.hero-indicadores button.ativo {
+  background: var(--rust-red-hover);
+}
+
+.esqueleto-card {
+  height: 430px;
+}
+
+/* Telas médias e grandes: espaço para as setas */
+@media (min-width: 768px) {
+  .hero-conteudo {
+    margin-left: 1.75rem;
+    margin-right: 1.75rem;
+  }
+}
+
+/* Tablet e celular: sem setas e com degradê vertical */
+@media (max-width: 767.98px) {
+  .hero {
+    min-height: 420px;
+  }
+
+  .hero::before {
+    background: linear-gradient(0deg, rgba(10, 10, 12, 0.97) 0%, rgba(10, 10, 12, 0.85) 55%, rgba(10, 10, 12, 0.35) 100%);
+  }
+
+  .hero-seta {
+    display: none;
+  }
+
+  .hero-conteudo {
+    padding-bottom: 2.75rem !important;
+  }
+
+  .hero-texto {
+    font-size: 0.95rem;
+  }
+
+  .hero-indicadores {
+    left: 0;
+    right: 0;
+    justify-content: center;
+  }
+}
+
+/* Celular: banner com texto e botões menores */
+@media (max-width: 575.98px) {
+  .hero {
+    min-height: 360px;
+  }
+
+  .hero h1 {
+    font-size: 1.9rem;
+  }
+
+  .hero-texto {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .hero .btn-lg {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .hero .fs-3 {
+    font-size: 1.4rem !important;
+  }
+}

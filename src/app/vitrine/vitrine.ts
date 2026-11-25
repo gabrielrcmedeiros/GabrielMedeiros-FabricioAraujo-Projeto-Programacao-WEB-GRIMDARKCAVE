@@ -1,63 +1,128 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { CurrencyPipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { Produto, desconto, imagemDe, precoAtual } from '../model/produto';
+import { ProdutoService } from '../services/produto-service';
+import { CestaService } from '../services/cesta-service';
+import { NotificacaoService } from '../services/notificacao-service';
+import { mensagemErro } from '../services/api';
+import { CardJogo } from '../card-jogo/card-jogo';
+
+type Filtro = 'todos' | 'promocao' | 'disponiveis';
+type Ordem = 'padrao' | 'menor' | 'maior' | 'nome';
 
 @Component({
   selector: 'app-vitrine',
-  imports: [CommonModule],
+  imports: [CurrencyPipe, RouterLink, CardJogo],
   templateUrl: './vitrine.html',
-  styleUrl: './vitrine.css'
+  styleUrl: './vitrine.css',
 })
-export class Vitrine {
-  /* Matriz central de dados contendo o catalogo de produtos e seus respectivos atributos tecnicos */
-  lista = [
-    { codigo: 1, nome: "Sekiro: Shadows Die Twice", categoria: "Souls-like", desenvolvedora: "FromSoftware", plataforma: "Chave Steam", descritivo: "Ação e furtividade em um Japão feudal sombrio, punitivo e brutal.", valor: 199.90, promo: 149.90, quantidade: 10 },
-    { codigo: 2, nome: "Warhammer 40,000: Darktide", categoria: "Warhammer", desenvolvedora: "Fatshark", plataforma: "Chave Steam", descritivo: "Enfrente hordas de inimigos hereges na cidade-colmeia de Tertium.", valor: 169.95, promo: 0, quantidade: 50 },
-    { codigo: 3, nome: "Dead Space Remake", categoria: "Sci-Fi Horror", desenvolvedora: "Motive Studio", plataforma: "Chave EA App", descritivo: "Sobreviva ao terror no espaço profundo a bordo da nave USG Ishimura.", valor: 249.00, promo: 199.00, quantidade: 15 },
-    { codigo: 4, nome: "Elden Ring", categoria: "Souls-like", desenvolvedora: "FromSoftware", plataforma: "Chave Steam", descritivo: "Explore as Terras Intermédias neste vasto RPG de fantasia sombria.", valor: 229.90, promo: 0, quantidade: 25 },
-    { codigo: 5, nome: "Kingdom Come: Deliverance", categoria: "RPG Medieval", desenvolvedora: "Warhorse Studios", plataforma: "Chave Steam", descritivo: "RPG medieval realista e imersivo no coração do Sacro Império Romano.", valor: 89.99, promo: 29.99, quantidade: 100 },
-    { codigo: 6, nome: "Blasphemous", categoria: "Souls-like", desenvolvedora: "The Game Kitchen", plataforma: "Chave Steam", descritivo: "Ação e plataforma brutal com combates intensos e exploração não linear.", valor: 59.90, promo: 25.00, quantidade: 5 },
-    { codigo: 7, nome: "Castlevania: Lords of Shadow 2", categoria: "Ação Sombria", desenvolvedora: "MercurySteam", plataforma: "Chave Steam", descritivo: "Assuma o papel de Drácula em uma jornada sombria para recuperar seus poderes e enfrentar ameaças sobrenaturais.", valor: 99.90, promo: 0, quantidade: 10 },
-    { codigo: 8, nome: "Darksiders Genesis", categoria: "Ação e RPG", desenvolvedora: "Airship Syndicate", plataforma: "Chave Steam", descritivo: "Explore um mundo de fantasia apocalíptica em uma aventura de ação com Guerra e Discórdia.", valor: 89.90, promo: 29.90, quantidade: 10 },
-    { codigo: 9, nome: "Middle-earth: Shadow of Mordor", categoria: "RPG de Ação", desenvolvedora: "Monolith Productions", plataforma: "Chave Steam", descritivo: "Enfrente as forças de Sauron em Mordor como Talion, um patrulheiro que busca vingança.", valor: 79.90, promo: 49.90, quantidade: 15 },
-    { codigo: 10, nome: "Wolfenstein: The Old Blood", categoria: "Sci-Fi Horror", desenvolvedora: "MachineGames", plataforma: "Chave Steam", descritivo: "Vivencie uma aventura intensa de tiro em primeira pessoa durante a Segunda Guerra Mundial.", valor: 79.90, promo: 0, quantidade: 20 },
-    { codigo: 11, nome: "Metal Gear Solid 3: Snake Eater", categoria: "Furtividade", desenvolvedora: "Konami", plataforma: "Chave Steam", descritivo: "Infiltre-se em território inimigo durante a Guerra Fria em uma missão de espionagem e sobrevivência.", valor: 89.90, promo: 59.90, quantidade: 8 },
-    { codigo: 12, nome: "Batman: Arkham Asylum GOTY", categoria: "Ação Sombria", desenvolvedora: "Rocksteady Studios", plataforma: "Chave Steam", descritivo: "Entre no manicômio de Gotham como Batman e enfrente o Coringa em uma aventura de ação e investigação.", valor: 69.90, promo: 0, quantidade: 12 }
-  ];
+export class Vitrine implements OnInit, OnDestroy {
+  private readonly service = inject(ProdutoService);
+  private readonly cesta = inject(CestaService);
+  private readonly aviso = inject(NotificacaoService);
 
-  /* Construtor responsavel por instanciar a injecao de dependencia de roteamento interno */
-  constructor(private router: Router) {}
+  /* Estado da tela */
+  readonly lista = signal<Produto[]>([]);
+  readonly destaques = signal<Produto[]>([]);
+  readonly indiceDestaque = signal(0);
+  readonly carregando = signal(true);
+  readonly erro = signal('');
+  readonly filtro = signal<Filtro>('todos');
+  readonly ordem = signal<Ordem>('padrao');
 
-  /* Persiste o estado do produto selecionado no armazenamento local e redireciona para a interface de detalhamento */
-  verDetalhe(obj: any) {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      localStorage.setItem('produto', JSON.stringify(obj));
-      this.router.navigate(['/detalhe']);
+  readonly destaqueAtual = computed(() => this.destaques()[this.indiceDestaque()] ?? null);
+
+  /* Lista com filtro e ordenação aplicados */
+  readonly listaExibida = computed(() => {
+    let jogos = this.lista();
+    if (this.filtro() === 'promocao') jogos = jogos.filter((p) => p.promo > 0);
+    if (this.filtro() === 'disponiveis') jogos = jogos.filter((p) => p.quantidade > 0);
+
+    const ordenados = [...jogos];
+    switch (this.ordem()) {
+      case 'menor':
+        ordenados.sort((a, b) => precoAtual(a) - precoAtual(b));
+        break;
+      case 'maior':
+        ordenados.sort((a, b) => precoAtual(b) - precoAtual(a));
+        break;
+      case 'nome':
+        ordenados.sort((a, b) => a.nome.localeCompare(b.nome));
+        break;
+    }
+    return ordenados;
+  });
+
+  protected readonly imagemDe = imagemDe;
+  protected readonly desconto = desconto;
+  protected readonly placeholders = [1, 2, 3, 4, 5, 6];
+  private temporizador?: ReturnType<typeof setInterval>;
+
+  ngOnInit() {
+    this.carregar();
+    /* Troca o destaque a cada 7 segundos */
+    this.temporizador = setInterval(() => this.proximoDestaque(), 7000);
+  }
+
+  ngOnDestroy() {
+    clearInterval(this.temporizador);
+  }
+
+  /* Carrega catálogo e destaques */
+  carregar() {
+    this.carregando.set(true);
+    this.erro.set('');
+
+    this.service.listar().subscribe({
+      next: (dados) => {
+        this.lista.set(dados);
+        this.carregando.set(false);
+      },
+      error: (err) => {
+        this.erro.set(mensagemErro(err, 'Não foi possível carregar o catálogo.'));
+        this.carregando.set(false);
+      },
+    });
+
+    this.service.destaques().subscribe({
+      next: (dados) => this.destaques.set(dados),
+      error: () => this.destaques.set([]),
+    });
+  }
+
+  proximoDestaque() {
+    const total = this.destaques().length;
+    if (total > 0) this.indiceDestaque.update((i) => (i + 1) % total);
+  }
+
+  anteriorDestaque() {
+    const total = this.destaques().length;
+    if (total > 0) this.indiceDestaque.update((i) => (i - 1 + total) % total);
+  }
+
+  /* Imagem de fundo do banner */
+  fundoDe(jogo: Produto): string {
+    return `url("${imagemDe(jogo)}")`;
+  }
+
+  irParaDestaque(indice: number) {
+    this.indiceDestaque.set(indice);
+  }
+
+  comprarDestaque(jogo: Produto) {
+    if (this.cesta.adicionar(jogo)) {
+      this.aviso.sucesso(`${jogo.nome} adicionado à cesta!`);
+    } else {
+      this.aviso.info(`Você já tem todas as unidades disponíveis de ${jogo.nome} na cesta.`);
     }
   }
 
-  /* Metodo de integracao ao carrinho: verifica presenca previa, ajusta somatorios e atualiza o estado da sessao */
-  adicionarCesta(obj: any) {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      let cestaStorage = localStorage.getItem('cesta');
-      let itens = cestaStorage ? JSON.parse(cestaStorage) : [];
+  alterarFiltro(valor: Filtro) {
+    this.filtro.set(valor);
+  }
 
-      let itemExistente = itens.find((item: any) => item.produto.codigo === obj.codigo);
-      let precoEfetivo = obj.promo > 0 ? obj.promo : obj.valor;
-
-      if (itemExistente) {
-        itemExistente.quantidade += 1;
-        itemExistente.valorTotal = itemExistente.quantidade * precoEfetivo;
-      } else {
-        itens.push({
-          produto: obj,
-          quantidade: 1,
-          valorTotal: precoEfetivo
-        });
-      }
-
-      localStorage.setItem('cesta', JSON.stringify(itens));
-      alert('Artefato adicionado à cesta de compras!');
-    }
+  alterarOrdem(evento: Event) {
+    this.ordem.set((evento.target as HTMLSelectElement).value as Ordem);
   }
 }

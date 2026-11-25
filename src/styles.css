@@ -1,40 +1,40 @@
-/* Importação do Bootstrap e dos Ícones do Bootstrap */
+/* Bootstrap e ícones */
 @import "bootstrap/dist/css/bootstrap.min.css";
 @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css");
 
-/* Importação de fonte externa (Google Fonts) para tipografia temática */
+/* Fonte dos títulos */
 @import url('https://fonts.googleapis.com/css2?family=Metal+Mania&display=swap');
 
-/* Aplicação restrita a cabeçalhos e elementos de destaque para preservar a legibilidade estrutural */
+/* Fonte temática apenas em títulos e destaques */
 h1, h2, h3, h4, h5, .nav-categoria, .navbar-brand {
   font-family: 'Metal Mania', system-ui, cursive !important;
   letter-spacing: 1px;
 }
 
-/* Ajuste específico para a logo em texto do cabeçalho */
+/* Nome da loja no cabeçalho */
 .navbar-brand {
   font-size: 1.8rem !important;
   color: var(--rust-red) !important;
 }
 
-/* Variáveis de cor do tema Grimdark Sci-Fi */
+/* Cores do tema */
 :root {
-  --bg-grimdark: #0a0a0c; /* Fundo principal quase preto */
-  --bg-navbar: #141417; /* Fundo do menu um pouco mais claro */
-  --rust-red: #8a2522; /* Vermelho ferrugem estilo Darktide */
-  --rust-red-hover: #a6302c; /* Vermelho ferrugem mais claro para hover */
-  --text-main: #e0e0e0; /* Cinza bem claro para títulos e textos principais */
-  --text-muted-grimdark: #b5b5be; /* Cinza metálico claro para rótulos e textos pequenos */
+  --bg-grimdark: #0a0a0c; /* Fundo principal */
+  --bg-navbar: #141417; /* Fundo do cabeçalho */
+  --rust-red: #8a2522; /* Cor de destaque */
+  --rust-red-hover: #a6302c; /* Destaque em foco */
+  --text-main: #e0e0e0; /* Texto principal */
+  --text-muted-grimdark: #b5b5be; /* Texto secundário */
 }
 
-/* Estilos Globais da Página */
+/* Página */
 body {
   background-color: var(--bg-grimdark);
   color: var(--text-main);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Personalização genérica de botões principais do tema */
+/* Botão principal */
 .btn-grimdark {
   background-color: var(--rust-red);
   color: #fff;
@@ -48,7 +48,7 @@ body {
   box-shadow: 0 0 10px rgba(138, 37, 34, 0.6);
 }
 
-/* Sobrescrevendo classes utilitárias do Bootstrap para garantir legibilidade no tema escuro */
+/* Contraste dos textos secundários */
 .text-muted {
   color: var(--text-muted-grimdark) !important;
 }
@@ -59,19 +59,215 @@ body {
   letter-spacing: 0.5px;
 }
 
-/* ======================================================= */
-/* EFEITO DE ILUMINAÇÃO DO SUBMUNDO (Fundo Global)         */
-/* ======================================================= */
-
-/* Aplica um gradiente linear fixo no corpo da página para simular luz ambiente. */
+/* Fundo da página: degradê fixo, do rodapé para o topo */
 body {
   min-height: 100vh;
   margin: 0;
-  
-  /* O gradiente avança de baixo para cima (to top). 
-     Começa em vermelho sangue escuro (#3a0404) e transiciona para o preto padrão (#0a0a0c) na metade da tela. */
   background: linear-gradient(to top, #3a0404 0%, #0a0a0c 40%, #0a0a0c 100%) !important;
-  
-  /* Mantém a origem da luz fixa no rodapé do navegador durante a rolagem de conteúdo */
   background-attachment: fixed !important;
+}
+/* Componentes compartilhados */
+
+/* Cores de texto */
+.icone-ferrugem {
+  color: var(--rust-red-hover);
+}
+
+.text-main {
+  color: var(--text-main);
+}
+
+.titulo-secao {
+  color: var(--text-main);
+  border-bottom: 2px solid var(--rust-red);
+  padding-bottom: 10px;
+}
+
+/* Painéis */
+.painel {
+  background-color: #141417;
+  border: 1px solid #333;
+  border-radius: 0.5rem;
+}
+
+.painel-escuro {
+  background-color: #0a0a0c;
+  border: 1px solid #333;
+  border-radius: 0.5rem;
+}
+
+/* Campos de formulário */
+.campo-escuro,
+.campo-escuro:focus {
+  background-color: #212529;
+  color: #fff;
+  border-color: #6c757d;
+}
+
+.campo-escuro:focus {
+  border-color: var(--rust-red-hover);
+  box-shadow: 0 0 0 0.2rem rgba(138, 37, 34, 0.35);
+}
+
+.campo-escuro::placeholder {
+  color: #8a8a94;
+}
+
+/* Cartão de jogo */
+.card-jogo {
+  background-color: #1a1a1f;
+  border: 1px solid #3a3a42;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  overflow: hidden;
+}
+
+.card-jogo:hover {
+  transform: translateY(-4px);
+  border-color: var(--rust-red);
+  box-shadow: 0 8px 22px rgba(138, 37, 34, 0.35);
+}
+
+.card-jogo .capa {
+  height: 220px;
+  object-fit: cover;
+  border-bottom: 1px solid #333;
+  transition: transform 0.4s ease;
+}
+
+.card-jogo:hover .capa {
+  transform: scale(1.04);
+}
+
+.selo {
+  position: absolute;
+  top: 0.75rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+}
+
+.selo-desconto {
+  left: 0.75rem;
+  background-color: var(--rust-red);
+}
+
+.selo-estoque {
+  right: 0.75rem;
+  background-color: #b8860b;
+  color: #000;
+}
+
+.categoria-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--rust-red-hover);
+  margin-bottom: 0.35rem;
+}
+
+.preco-antigo {
+  text-decoration: line-through;
+  color: var(--text-muted-grimdark);
+}
+
+.preco-atual {
+  color: var(--rust-red-hover);
+  font-weight: 700;
+}
+
+/* Botões de filtro */
+.chip {
+  border: 1px solid #444;
+  color: var(--text-muted-grimdark);
+  background: transparent;
+  border-radius: 999px;
+  padding: 0.3rem 0.9rem;
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.chip:hover,
+.chip.ativo {
+  border-color: var(--rust-red);
+  color: #fff;
+  background-color: rgba(138, 37, 34, 0.35);
+}
+
+/* Esqueleto de carregamento */
+.esqueleto {
+  background: linear-gradient(90deg, #1a1a1f 25%, #26262d 50%, #1a1a1f 75%);
+  background-size: 200% 100%;
+  animation: brilho 1.4s infinite;
+  border-radius: 0.5rem;
+}
+
+@keyframes brilho {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* Notificações */
+.toast-grimdark {
+  background-color: #17171c;
+  color: var(--text-main);
+  border: 1px solid #444;
+  border-left: 4px solid #6c757d;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+}
+
+.toast-grimdark.toast-sucesso {
+  border-left-color: #3fa75b;
+}
+
+.toast-grimdark.toast-erro {
+  border-left-color: var(--rust-red-hover);
+}
+
+/* Tabelas */
+.tabela-grimdark {
+  --bs-table-bg: #141417;
+  --bs-table-color: var(--text-main);
+  --bs-table-border-color: #2c2c33;
+  --bs-table-hover-bg: #1f1f25;
+  --bs-table-hover-color: #fff;
+}
+
+/* Menos animação quando o sistema pede */
+@media (prefers-reduced-motion: reduce) {
+  .card-jogo,
+  .card-jogo .capa,
+  .nav-categoria,
+  .esqueleto {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* Celular: títulos, cartões e notificações mais compactos */
+@media (max-width: 575.98px) {
+  h2 {
+    font-size: 1.6rem;
+  }
+
+  h3 {
+    font-size: 1.4rem;
+  }
+
+  h4 {
+    font-size: 1.2rem;
+  }
+
+  .card-jogo .capa {
+    height: 190px;
+  }
+
+  .toast-container {
+    padding: 0.5rem !important;
+  }
 }

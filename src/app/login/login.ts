@@ -1,121 +1,111 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { RouterModule, Router } from '@angular/router';
+import { Component, inject, signal } from '@angular/core';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Cliente } from '../model/cliente';
+import { ClienteService } from '../services/cliente-service';
+import { SessaoService } from '../services/sessao-service';
+import { NotificacaoService } from '../services/notificacao-service';
+import { mensagemErro } from '../services/api';
+import { cpfValido } from '../validadores';
 
 @Component({
   selector: 'app-login',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './login.html',
-  styleUrl: './login.css'
+  styleUrl: './login.css',
 })
 export class Login {
-  /* Grupos de controle reativo para gerenciamento dos formularios independentes */
-  loginForm: FormGroup;
-  cadastroForm: FormGroup;
-  modoCadastro: boolean = false;
-  
-  /* Variaveis de estado para controle de visibilidade dos campos de senha */
-  mostrarSenhaLogin: boolean = false;
-  mostrarSenhaCadastro: boolean = false;
+  private readonly fb = inject(FormBuilder);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly service = inject(ClienteService);
+  private readonly sessao = inject(SessaoService);
+  private readonly aviso = inject(NotificacaoService);
 
-  /* Metodos alternadores para manipulacao do tipo de input das senhas */
-  alternarSenhaLogin() {
-    this.mostrarSenhaLogin = !this.mostrarSenhaLogin;
+  /* Estado da tela */
+  readonly modoCadastro = signal(false);
+  readonly mostrarSenhaLogin = signal(false);
+  readonly mostrarSenhaCadastro = signal(false);
+  readonly enviando = signal(false);
+
+  /* Formulário de login */
+  readonly loginForm = this.fb.nonNullable.group({
+    email: ['', [Validators.required, Validators.email]],
+    senha: ['', [Validators.required, Validators.minLength(6)]],
+  });
+
+  /* Formulário de cadastro */
+  readonly cadastroForm = this.fb.nonNullable.group({
+    nome: ['', [Validators.required, Validators.minLength(3)]],
+    email: ['', [Validators.required, Validators.email]],
+    senha: ['', [Validators.required, Validators.minLength(6)]],
+    cpf: ['', [Validators.required, Validators.pattern(/^\d{3}\.?\d{3}\.?\d{3}\-?\d{2}$/), cpfValido]],
+    telefone: ['', [Validators.required, Validators.pattern(/^\(?\d{2}\)?\s?(9\d{4})\-?(\d{4})$/)]],
+  });
+
+  alternarModo(cadastro: boolean) {
+    this.modoCadastro.set(cadastro);
   }
 
-  alternarSenhaCadastro() {
-    this.mostrarSenhaCadastro = !this.mostrarSenhaCadastro;
-  }
-
-  constructor(private fb: FormBuilder, private router: Router) {
-    /* Instanciacao do formulario de login com aplicacao de regras de validacao nativas */
-    this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      senha: ['', [Validators.required, Validators.minLength(6)]]
-    });
-
-    /* Instanciacao do formulario de cadastro com aplicacao de regras de validacao e expressoes regulares (Regex) */
-    this.cadastroForm = this.fb.group({
-      nome: ['', [Validators.required, Validators.minLength(3)]],
-      email: ['', [Validators.required, Validators.email]],
-      senha: ['', [Validators.required, Validators.minLength(6)]],
-      /* Aplicacao de expressao regular para validacao estrutural do formato do CPF */
-      cpf: ['', [Validators.required, Validators.pattern(/^\d{3}\.?\d{3}\.?\d{3}\-?\d{2}$/)]],
-      /* Aplicacao de expressao regular para validacao estrutural do formato do telefone contendo DDD */
-      telefone: ['', [Validators.required, Validators.pattern(/^\(?\d{2}\)?\s?(9\d{4})\-?(\d{4})$/)]]
-    });
-  }
-
-  /* Metodo responsavel pela alternancia entre as interfaces de autenticacao e registro */
-  alternarModo() {
-    this.modoCadastro = !this.modoCadastro;
-  }
-
-  /* Processa a tentativa de autenticacao cruzando as credenciais inseridas com os registros da base local */
+  /* Autentica o cliente */
   fazerLogin() {
-    if (this.loginForm.valid) {
-      const emailDigitado = this.loginForm.value.email;
-      const senhaDigitada = this.loginForm.value.senha;
-      
-      if (typeof window !== 'undefined' && window.localStorage) {
-        /* Recupera a colecao de usuarios armazenada no cache local */
-        let usuarios = JSON.parse(localStorage.getItem('usuariosGDC') || '[]');
-        
-        /* Valida a existencia do usuario requerendo correspondencia exata de email e senha */
-        let usuarioValido = usuarios.find((u: any) => u.email === emailDigitado && u.senha === senhaDigitada);
+    if (this.loginForm.invalid) return;
+    const { email, senha } = this.loginForm.getRawValue();
 
-        if (usuarioValido) {
-          localStorage.setItem('usuarioLogado', emailDigitado);
-          alert('Acesso autorizado às criptas da GRIMDARK CAVE!');
-          this.loginForm.reset();
-          this.router.navigate(['/inicio']);
-        } else {
-          /* Interrompe a autenticacao em caso de credenciais invalidas ou nao encontradas */
-          alert('ACESSO NEGADO: E-mail não encontrado ou senha incorreta.');
-        }
-      }
-    }
+    this.enviando.set(true);
+    this.service.login(email, senha).subscribe({
+      next: (cliente) => {
+        this.enviando.set(false);
+        this.entrar(cliente, `Acesso autorizado às criptas! Bem-vindo, ${cliente.nome.split(' ')[0]}.`);
+      },
+      error: (err) => {
+        this.enviando.set(false);
+        this.aviso.erro(mensagemErro(err, 'ACESSO NEGADO: e-mail não encontrado ou senha incorreta.'));
+      },
+    });
   }
 
-  /* Processa o registro de um novo usuario garantindo a unicidade do endereco de e-mail na persistencia local */
+  /* Cadastra e já inicia a sessão */
   fazerCadastro() {
-    if (this.cadastroForm.valid) {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        let usuarios = JSON.parse(localStorage.getItem('usuariosGDC') || '[]');
-        
-        /* Verifica e bloqueia a criacao de contas duplicadas utilizando o e-mail como chave primaria */
-        if (usuarios.find((u: any) => u.email === this.cadastroForm.value.email)) {
-          alert('Este e-mail já pertence a um membro das criptas!');
-          return;
-        }
-
-        /* Insere o novo objeto no vetor principal e atualiza o armazenamento local */
-        usuarios.push(this.cadastroForm.value);
-        localStorage.setItem('usuariosGDC', JSON.stringify(usuarios));
-      }
-
-      alert('Recrutamento realizado com sucesso! Faça seu login para entrar.');
-      this.cadastroForm.reset();
-      this.modoCadastro = false;
-    } else {
-      /* Tratamento de excecao para submissao do formulario de cadastro em estado de validacao irregular */
-      alert('Os dados inseridos são inválidos. Verifique o formato do CPF e do Telefone.');
+    if (this.cadastroForm.invalid) {
+      this.cadastroForm.markAllAsTouched();
+      this.aviso.erro('Os dados inseridos são inválidos. Verifique o CPF e o telefone.');
+      return;
     }
+
+    const novo: Cliente = { ...new Cliente(), ...this.cadastroForm.getRawValue() };
+    this.enviando.set(true);
+    this.service.cadastrar(novo).subscribe({
+      next: (cliente) => {
+        this.enviando.set(false);
+        this.cadastroForm.reset();
+        this.entrar(cliente, 'Recrutamento realizado com sucesso! Você já está nas criptas.');
+      },
+      error: (err) => {
+        this.enviando.set(false);
+        this.aviso.erro(mensagemErro(err, 'Não foi possível concluir o cadastro.'));
+      },
+    });
   }
 
-  /* Interceptador de eventos de entrada para o campo CPF que sanitiza a string mantendo apenas digitos e pontuacoes aceitas */
-  filtrarCpf(event: any) {
-    const input = event.target as HTMLInputElement;
-    const valorLimpo = input.value.replace(/[^0-9.-]/g, '');
-    this.cadastroForm.get('cpf')?.setValue(valorLimpo, { emitEvent: false });
+  /* Inicia a sessão e volta à página de origem */
+  private entrar(cliente: Cliente, mensagem: string) {
+    this.sessao.entrar(cliente);
+    this.loginForm.reset();
+    this.aviso.sucesso(mensagem);
+    const retorno = this.route.snapshot.queryParamMap.get('retorno');
+    this.router.navigateByUrl(retorno && retorno.startsWith('/') ? retorno : '/inicio');
   }
 
-  /* Interceptador de eventos de entrada para o campo Telefone que sanitiza a string mantendo apenas digitos e caracteres de formatacao aceitos */
-  filtrarTelefone(event: any) {
+  /* Aceita só dígitos, ponto e hífen */
+  filtrarCpf(event: Event) {
     const input = event.target as HTMLInputElement;
-    const valorLimpo = input.value.replace(/[^0-9() -]/g, '');
-    this.cadastroForm.get('telefone')?.setValue(valorLimpo, { emitEvent: false });
+    this.cadastroForm.controls.cpf.setValue(input.value.replace(/[^0-9.-]/g, ''), { emitEvent: false });
+  }
+
+  /* Aceita só dígitos e formatação de telefone */
+  filtrarTelefone(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.cadastroForm.controls.telefone.setValue(input.value.replace(/[^0-9() -]/g, ''), { emitEvent: false });
   }
 }

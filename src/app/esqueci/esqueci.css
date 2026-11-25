@@ -1,0 +1,16 @@
+.email-simulado {
+  background-color: #0a0a0c;
+  border: 1px dashed var(--rust-red);
+}
+
+.codigo {
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.3rem;
+  letter-spacing: 3px;
+  margin-left: 0.25rem;
+}
+
+.campo-codigo {
+  letter-spacing: 2px;
+}

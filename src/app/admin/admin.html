@@ -1,0 +1,189 @@
+<div class="text-light">
+
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 pb-3 titulo-secao">
+    <h2 class="fw-bold m-0 text-main"><i class="bi bi-hammer me-2 text-warning"></i> Forja do Catálogo</h2>
+    <span class="small text-muted">Painel do administrador &middot; CRUD em /api/produto</span>
+  </div>
+
+  <!-- Indicadores -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+      <div class="painel p-3 h-100"><span class="d-block small text-muted text-uppercase">Jogos</span><span class="fs-3 fw-bold">{{ lista().length }}</span></div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="painel p-3 h-100"><span class="d-block small text-muted text-uppercase">Chaves em estoque</span><span class="fs-3 fw-bold">{{ totalEstoque() }}</span></div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="painel p-3 h-100"><span class="d-block small text-muted text-uppercase">Em promoção</span><span class="fs-3 fw-bold preco-atual">{{ emPromocao() }}</span></div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="painel p-3 h-100"><span class="d-block small text-muted text-uppercase">Esgotados</span><span class="fs-3 fw-bold text-warning">{{ esgotados() }}</span></div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+
+    <!-- Cadastro e edição -->
+    <div class="col-lg-4">
+      <form class="painel p-3 p-md-4 sticky-lg-top formulario" [formGroup]="form" (ngSubmit)="salvar()">
+        <h4 class="mb-3">
+          @if (editando() > 0) {
+            <i class="bi bi-pencil-square me-1 text-warning"></i> Editando #{{ editando() }}
+          } @else {
+            <i class="bi bi-plus-circle me-1 icone-ferrugem"></i> Novo jogo
+          }
+        </h4>
+
+        <div class="mb-2">
+          <label class="form-label small" for="adm-nome">Nome</label>
+          <input id="adm-nome" class="form-control form-control-sm campo-escuro" formControlName="nome" [class.is-invalid]="invalido('nome')">
+        </div>
+
+        <div class="row g-2 mb-2">
+          <div class="col-6">
+            <label class="form-label small" for="adm-categoria">Categoria</label>
+            <input id="adm-categoria" class="form-control form-control-sm campo-escuro" formControlName="categoria" list="lista-categorias" [class.is-invalid]="invalido('categoria')">
+            <datalist id="lista-categorias">
+              @for (cat of categorias(); track cat) {
+                <option [value]="cat"></option>
+              }
+            </datalist>
+          </div>
+          <div class="col-6">
+            <label class="form-label small" for="adm-plataforma">Plataforma</label>
+            <input id="adm-plataforma" class="form-control form-control-sm campo-escuro" formControlName="plataforma" [class.is-invalid]="invalido('plataforma')">
+          </div>
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label small" for="adm-dev">Desenvolvedora</label>
+          <input id="adm-dev" class="form-control form-control-sm campo-escuro" formControlName="desenvolvedora">
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label small" for="adm-desc">Descrição</label>
+          <textarea id="adm-desc" rows="3" class="form-control form-control-sm campo-escuro" formControlName="descritivo" [class.is-invalid]="invalido('descritivo')"></textarea>
+        </div>
+
+        <div class="row g-2 mb-2">
+          <div class="col-6">
+            <label class="form-label small" for="adm-valor">Valor (R$)</label>
+            <input id="adm-valor" type="number" step="0.01" min="0" class="form-control form-control-sm campo-escuro" formControlName="valor" [class.is-invalid]="invalido('valor')">
+          </div>
+          <div class="col-6">
+            <label class="form-label small" for="adm-promo">Promoção (R$)</label>
+            <input id="adm-promo" type="number" step="0.01" min="0" class="form-control form-control-sm campo-escuro" formControlName="promo"
+                   [class.is-invalid]="invalido('promo') || (form.errors?.['promoInvalida'] && form.controls.promo.touched)">
+          </div>
+        </div>
+        @if (form.errors?.['promoInvalida']) {
+          <p class="small text-danger mb-2">A promoção deve ser menor que o valor cheio (ou 0 para nenhuma).</p>
+        }
+
+        <div class="row g-2 mb-2">
+          <div class="col-6">
+            <label class="form-label small" for="adm-qtd">Estoque</label>
+            <input id="adm-qtd" type="number" min="0" class="form-control form-control-sm campo-escuro" formControlName="quantidade" [class.is-invalid]="invalido('quantidade')">
+          </div>
+          <div class="col-6">
+            <label class="form-label small" for="adm-destaque">Destaque (0 = não)</label>
+            <input id="adm-destaque" type="number" min="0" class="form-control form-control-sm campo-escuro" formControlName="destaque">
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label small" for="adm-imagem">Imagem (arquivo da pasta public ou URL)</label>
+          <input id="adm-imagem" class="form-control form-control-sm campo-escuro" formControlName="imagem" placeholder="ex: 13.jpg"
+                 [class.is-invalid]="invalido('imagem')">
+          <div class="invalid-feedback">Máximo de 1000 caracteres.</div>
+          <div class="form-text text-muted">
+            Use o link direto da imagem (botão direito na imagem &rarr; "Copiar endereço da imagem"), não o link da página de pesquisa.
+          </div>
+
+          <!-- Pré-visualização da capa -->
+          @if (form.controls.imagem.value) {
+            <img [src]="form.controls.imagem.value" alt="Pré-visualização da capa" class="preview-capa mt-2"
+                 [class.d-none]="previewComErro()" (load)="previewComErro.set(false)" (error)="previewComErro.set(true)">
+            @if (previewComErro()) {
+              <p class="small text-warning mt-2 mb-0">
+                <i class="bi bi-exclamation-triangle me-1"></i> Não foi possível abrir essa imagem. Confira o link ou o nome do arquivo.
+              </p>
+            }
+          }
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-grimdark flex-grow-1" [disabled]="salvando()">
+            @if (salvando()) {
+              <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+            }
+            {{ editando() > 0 ? 'Salvar alterações' : 'Cadastrar jogo' }}
+          </button>
+          @if (editando() > 0) {
+            <button type="button" class="btn btn-outline-secondary" (click)="cancelar()">Cancelar</button>
+          }
+        </div>
+      </form>
+    </div>
+
+    <!-- Tabela do catálogo -->
+    <div class="col-lg-8">
+      <div class="painel p-3">
+        <input type="search" class="form-control form-control-sm campo-escuro mb-3" placeholder="Filtrar por nome ou categoria..." (input)="filtrar($event)" aria-label="Filtrar jogos">
+
+        @if (carregando()) {
+          <div class="text-center py-5"><div class="spinner-border icone-ferrugem" role="status"><span class="visually-hidden">Carregando...</span></div></div>
+        } @else {
+          <div class="table-responsive">
+            <table class="table table-hover align-middle tabela-grimdark small m-0">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Jogo</th>
+                  <th scope="col" class="text-end">Preço</th>
+                  <th scope="col" class="text-center">Estoque</th>
+                  <th scope="col" class="text-end">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (p of listaFiltrada(); track p.codigo) {
+                  <tr [class.linha-editando]="p.codigo === editando()">
+                    <td class="text-muted">{{ p.codigo }}</td>
+                    <td>
+                      <div class="d-flex align-items-center gap-2">
+                        <img [src]="imagemDe(p)" [alt]="'Capa de ' + p.nome" class="rounded miniatura-admin">
+                        <div>
+                          <div class="fw-semibold">{{ p.nome }}</div>
+                          <div class="text-muted">{{ p.categoria }}@if (p.destaque > 0) { &middot; <span class="text-warning">destaque {{ p.destaque }}</span> }</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="text-end">
+                      @if (p.promo > 0) {
+                        <div class="preco-antigo">{{ p.valor | currency }}</div>
+                        <div class="preco-atual">{{ p.promo | currency }}</div>
+                      } @else {
+                        {{ p.valor | currency }}
+                      }
+                    </td>
+                    <td class="text-center">
+                      <span class="badge" [class.bg-success]="p.quantidade > 5" [class.bg-warning]="p.quantidade > 0 && p.quantidade <= 5"
+                            [class.text-dark]="p.quantidade > 0 && p.quantidade <= 5" [class.bg-danger]="p.quantidade <= 0">{{ p.quantidade }}</span>
+                    </td>
+                    <td class="text-end text-nowrap">
+                      <button type="button" class="btn btn-sm btn-outline-light me-1" (click)="editar(p)" [attr.aria-label]="'Editar ' + p.nome"><i class="bi bi-pencil"></i></button>
+                      <button type="button" class="btn btn-sm btn-outline-danger" (click)="excluir(p)" [attr.aria-label]="'Excluir ' + p.nome"><i class="bi bi-trash3"></i></button>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr><td colspan="5" class="text-center text-muted py-4">Nenhum jogo encontrado.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -1,95 +1,119 @@
-<!-- Renderizacao condicional da estrutura principal baseada na presenca de dados do produto no escopo -->
-<div class="container mt-5 text-light" *ngIf="produto">
-  
-  <!-- Trilha de navegacao (breadcrumb) para orientacao espacial do usuario no sistema -->
-  <nav aria-label="breadcrumb" class="mb-4">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a routerLink="/inicio" class="text-decoration-none" style="color: var(--rust-red);">Catálogo</a></li>
-      <li class="breadcrumb-item active text-muted" aria-current="page">{{ produto.nome }}</li>
-    </ol>
-  </nav>
-
-  <div class="row align-items-start">
-    
-    <!-- Secao esquerda: Apresentacao visual e detalhamento tecnico do produto -->
-    <div class="col-lg-8 mb-4">
-      
-      <!-- Container de exibicao da midia principal associada ao item -->
-      <div class="position-relative mb-4">
-        <img [src]="produto.codigo + '.jpg'" class="img-fluid rounded shadow w-100" alt="Capa do Jogo" style="max-height: 450px; object-fit: cover; border: 1px solid #333;">
-      </div>
-
-      <!-- Bloco de informacoes descritivas e especificacoes tecnicas -->
-      <div class="p-4 rounded shadow-sm" style="background-color: #141417; border: 1px solid #333;">
-        <h4 class="fw-bold mb-3 pb-2" style="color: var(--text-main); border-bottom: 1px solid var(--rust-red);">
-          Sobre o Artefato
-        </h4>
-        
-        <!-- Renderizacao da descricao detalhada do produto -->
-        <p class="mb-4" style="color: var(--text-muted-grimdark); line-height: 1.6; font-size: 1.1rem;">
-          {{ produto.descritivo }}
-        </p>
-
-        <!-- Grade de atributos estruturados com dados complementares -->
-        <div class="row pt-3" style="border-top: 1px solid #222;">
-          <div class="col-md-4 mb-3">
-            <span class="d-block text-muted small fw-bold text-uppercase">Desenvolvedora</span>
-            <!-- Tratamento de valor padrao para atributo nao especificado na fonte de dados -->
-            <span style="color: #e0e0e0;">{{ produto.desenvolvedora || 'Não informada' }}</span>
-          </div>
-          <div class="col-md-4 mb-3">
-            <span class="d-block text-muted small fw-bold text-uppercase">Categoria</span>
-            <span style="color: #e0e0e0;">{{ produto.categoria || 'Não classificado' }}</span>
-          </div>
-          <div class="col-md-4 mb-3">
-            <span class="d-block text-muted small fw-bold text-uppercase">Plataforma / Resgate</span>
-            <span style="color: #e0e0e0;">
-              <i class="bi bi-key-fill text-secondary me-1"></i> {{ produto.plataforma || 'Chave Digital' }}
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Secao direita: Painel de precificacao e acoes de conversao -->
-    <div class="col-lg-4 sticky-lg-top" style="top: 2rem;">
-      <div class="p-4 rounded shadow" style="background-color: #0a0a0c; border: 1px solid #333;">
-        
-        <h2 class="fw-bold mb-1" style="color: var(--text-main); font-size: 2rem;">{{ produto.nome }}</h2>
-        <p class="text-secondary small mb-4">Quantidade no arsenal: {{ produto.quantidade }} unidades</p>
-        
-        <!-- Estrutura de apresentacao dos valores financeiros -->
-        <div class="p-3 mb-4 rounded" style="background-color: #141417; border: 1px dashed #444;">
-          <!-- Renderizacao condicional para itens com desconto financeiro aplicado -->
-          <div *ngIf="produto.promo > 0">
-            <span class="text-decoration-line-through text-muted fs-6 d-block">De: R$ {{ produto.valor | number:'1.2-2' }}</span>
-            <span class="fw-bold d-block" style="color: var(--rust-red); font-size: 2.2rem;">R$ {{ produto.promo | number:'1.2-2' }}</span>
-          </div>
-          
-          <!-- Renderizacao condicional para itens comercializados pelo valor integral -->
-          <div *ngIf="produto.promo <= 0">
-            <span class="fw-bold d-block" style="color: var(--text-main); font-size: 2.2rem;">R$ {{ produto.valor | number:'1.2-2' }}</span>
-          </div>
-        </div>
-        
-        <!-- Controles de interacao condicionados a disponibilidade de estoque -->
-        <button class="btn btn-grimdark btn-lg w-100 mb-3 py-3 fw-bold text-uppercase" *ngIf="produto.quantidade > 0" (click)="adicionarCesta(produto)">
-          <i class="bi bi-cart-plus me-2"></i> Adicionar à Cesta
-        </button>
-        
-        <button class="btn btn-dark border-secondary btn-lg w-100 mb-3 py-3 fw-bold text-uppercase text-muted" *ngIf="produto.quantidade <= 0" disabled>
-          <i class="bi bi-x-circle me-2"></i> Indisponível
-        </button>
-        
-        <a routerLink="/inicio" class="btn btn-outline-secondary w-100 py-2">Explorar mais itens</a>
-      </div>
-    </div>
-    
+@if (carregando()) {
+  <div class="text-center py-5">
+    <div class="spinner-border icone-ferrugem" role="status"><span class="visually-hidden">Carregando...</span></div>
   </div>
-</div>
+} @else {
+@if (produto(); as jogo) {
+  <div class="text-light">
 
-<!-- Tratamento de excecao visual para acesso direto a rota sem contexto de produto valido na memoria -->
-<div class="container mt-5 text-center text-light" *ngIf="!produto">
-  <h3 class="mb-4">Nenhum artefato foi selecionado.</h3>
-  <a routerLink="/inicio" class="btn btn-grimdark"><i class="bi bi-arrow-left me-2"></i> Voltar ao Catálogo</a>
-</div>
+    <!-- Trilha de navegação -->
+    <nav aria-label="breadcrumb" class="mb-4">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a routerLink="/inicio" class="text-decoration-none icone-ferrugem">Catálogo</a></li>
+        <li class="breadcrumb-item">
+          <a routerLink="/busca" [queryParams]="{ categoria: jogo.categoria }" class="text-decoration-none icone-ferrugem">{{ jogo.categoria }}</a>
+        </li>
+        <li class="breadcrumb-item active text-muted" aria-current="page">{{ jogo.nome }}</li>
+      </ol>
+    </nav>
+
+    <div class="row align-items-start">
+
+      <!-- Capa e descrição -->
+      <div class="col-lg-8 mb-4">
+        <div class="position-relative mb-4">
+          <img [src]="imagemDe(jogo)" class="img-fluid rounded shadow w-100 capa-detalhe" [alt]="'Capa de ' + jogo.nome">
+          @if (jogo.promo > 0) {
+            <span class="badge selo selo-desconto fs-6">-{{ desconto(jogo) }}%</span>
+          }
+        </div>
+
+        <div class="p-3 p-md-4 painel shadow-sm">
+          <h4 class="fw-bold mb-3 pb-2 text-main sobre-titulo">Sobre o Artefato</h4>
+          <p class="mb-4 text-muted descricao">{{ jogo.descritivo }}</p>
+
+          <!-- Ficha técnica -->
+          <div class="row pt-3 atributos">
+            <div class="col-md-4 mb-3">
+              <span class="d-block text-muted small fw-bold text-uppercase">Desenvolvedora</span>
+              <span>{{ jogo.desenvolvedora || 'Não informada' }}</span>
+            </div>
+            <div class="col-md-4 mb-3">
+              <span class="d-block text-muted small fw-bold text-uppercase">Categoria</span>
+              <span>{{ jogo.categoria || 'Não classificado' }}</span>
+            </div>
+            <div class="col-md-4 mb-3">
+              <span class="d-block text-muted small fw-bold text-uppercase">Plataforma / Resgate</span>
+              <span><i class="bi bi-key-fill text-secondary me-1"></i> {{ jogo.plataforma || 'Chave Digital' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preço e compra -->
+      <div class="col-lg-4 sticky-lg-top painel-compra">
+        <div class="p-3 p-md-4 painel-escuro shadow">
+          <h2 class="fw-bold mb-1 text-main">{{ jogo.nome }}</h2>
+
+          @if (jogo.quantidade > 5) {
+            <p class="small mb-4 text-success"><i class="bi bi-check-circle me-1"></i> Em estoque: {{ jogo.quantidade }} chaves</p>
+          } @else if (jogo.quantidade > 0) {
+            <p class="small mb-4 text-warning"><i class="bi bi-exclamation-triangle me-1"></i> Últimas {{ jogo.quantidade }} chaves no arsenal!</p>
+          } @else {
+            <p class="small mb-4 text-danger"><i class="bi bi-x-circle me-1"></i> Esgotado</p>
+          }
+
+          <div class="p-3 mb-4 rounded caixa-preco">
+            @if (jogo.promo > 0) {
+              <span class="preco-antigo fs-6 d-block">De: {{ jogo.valor | currency }}</span>
+              <span class="preco-atual d-block preco-grande">{{ jogo.promo | currency }}</span>
+              <span class="small text-success">Você economiza {{ (jogo.valor - jogo.promo) | currency }}</span>
+            } @else {
+              <span class="fw-bold d-block text-main preco-grande">{{ jogo.valor | currency }}</span>
+            }
+          </div>
+
+          @if (cesta.quantidadeDe(jogo.codigo) > 0) {
+            <p class="small text-muted"><i class="bi bi-cart-check me-1"></i> Você já tem {{ cesta.quantidadeDe(jogo.codigo) }} na cesta.</p>
+          }
+
+          <!-- Botões conforme o estoque -->
+          @if (jogo.quantidade > 0) {
+            <button type="button" class="btn btn-grimdark btn-lg w-100 mb-2 py-3 fw-bold text-uppercase" (click)="comprarAgora(jogo)">
+              <i class="bi bi-lightning-charge-fill me-2"></i> Comprar agora
+            </button>
+            <button type="button" class="btn btn-outline-light w-100 mb-3 py-2" (click)="adicionarCesta(jogo)">
+              <i class="bi bi-cart-plus me-2"></i> Adicionar à Cesta
+            </button>
+          } @else {
+            <button type="button" class="btn btn-dark border-secondary btn-lg w-100 mb-3 py-3 fw-bold text-uppercase text-muted" disabled>
+              <i class="bi bi-x-circle me-2"></i> Indisponível
+            </button>
+          }
+
+          <a routerLink="/inicio" class="btn btn-outline-secondary w-100 py-2">Explorar mais itens</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Jogos da mesma categoria -->
+    @if (relacionados().length > 0) {
+      <h4 class="mt-4 mb-4 titulo-secao">Do mesmo abismo</h4>
+      <div class="row">
+        @for (obj of relacionados(); track obj.codigo) {
+          <div class="col-12 col-md-6 col-lg-4 mb-4">
+            <app-card-jogo [produto]="obj" />
+          </div>
+        }
+      </div>
+    }
+  </div>
+} @else {
+  <!-- Jogo não encontrado -->
+  <div class="mt-5 text-center text-light">
+    <h3 class="mb-3">Nenhum artefato foi encontrado.</h3>
+    <p class="text-muted mb-4">{{ erro() }}</p>
+    <a routerLink="/inicio" class="btn btn-grimdark"><i class="bi bi-arrow-left me-2"></i> Voltar ao Catálogo</a>
+  </div>
+}
+}

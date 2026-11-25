@@ -1,0 +1,103 @@
+### Requisições de exemplo da API (extensão REST Client do VS Code)
+
+@api = http://localhost:8081/api
+
+### Catálogo completo
+GET {{api}}/produto
+
+### Destaques
+GET {{api}}/produto/destaques
+
+### Busca textual
+GET {{api}}/produto/busca?termo=souls
+
+### Busca por categoria
+GET {{api}}/produto/busca?categoria=Souls-like
+
+### Um jogo
+GET {{api}}/produto/4
+
+### Cadastrar jogo (201 Created)
+POST {{api}}/produto
+Content-Type: application/json
+
+{
+  "nome": "Darkest Dungeon",
+  "categoria": "RPG Medieval",
+  "desenvolvedora": "Red Hook Studios",
+  "plataforma": "Chave Steam",
+  "descritivo": "Lidere heróis atormentados pelas masmorras sob a mansão da família.",
+  "valor": 59.99,
+  "promo": 19.99,
+  "quantidade": 30,
+  "destaque": 0,
+  "imagem": "https://placehold.co/600x900/141417/8a2522?text=Darkest+Dungeon"
+}
+
+### Alterar jogo
+PUT {{api}}/produto/13
+Content-Type: application/json
+
+{
+  "nome": "Darkest Dungeon",
+  "categoria": "RPG Medieval",
+  "desenvolvedora": "Red Hook Studios",
+  "plataforma": "Chave Steam",
+  "descritivo": "Versão atualizada da descrição.",
+  "valor": 59.99,
+  "promo": 0,
+  "quantidade": 25,
+  "destaque": 0,
+  "imagem": ""
+}
+
+### Excluir jogo (204; 409 se já vendido)
+DELETE {{api}}/produto/13
+
+### Cadastro de cliente (201; 409 se o e-mail já existir)
+POST {{api}}/cliente
+Content-Type: application/json
+
+{
+  "nome": "Viajante Teste",
+  "email": "viajante@grimdark.com",
+  "senha": "123456",
+  "cpf": "529.982.247-25",
+  "telefone": "(11) 91234-5678"
+}
+
+### Login (200; 401 se inválido)
+POST {{api}}/cliente/login
+Content-Type: application/json
+
+{ "email": "viajante@grimdark.com", "senha": "123456" }
+
+### Recuperação de senha: gera o código
+POST {{api}}/cliente/recuperarSenha
+Content-Type: application/json
+
+{ "email": "viajante@grimdark.com" }
+
+### Redefinição de senha
+PATCH {{api}}/cliente/redefinirSenha
+Content-Type: application/json
+
+{ "email": "viajante@grimdark.com", "codigo": "COLE_O_CODIGO", "novaSenha": "nova123" }
+
+### Finalizar compra (201; 409 sem estoque)
+POST {{api}}/pedido
+Content-Type: application/json
+
+{
+  "codigoCliente": 2,
+  "itens": [
+    { "produto": { "codigo": 4 }, "quantidade": 1 },
+    { "produto": { "codigo": 6 }, "quantidade": 2 }
+  ]
+}
+
+### Pedidos do cliente
+GET {{api}}/pedido/cliente/2
+
+### Chaves do cliente
+GET {{api}}/chave/cliente/2

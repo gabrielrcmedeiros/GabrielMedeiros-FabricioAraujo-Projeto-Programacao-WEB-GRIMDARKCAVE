@@ -1,47 +1,94 @@
-<div class="container mt-2">
-  <h2 class="mb-4 text-white" style="border-bottom: 2px solid var(--rust-red); padding-bottom: 10px;">Catálogo de Sobrevivência</h2>
-  
-  <div class="row">
-    <!-- Estrutura de repeticao para renderizacao dinamica da matriz de produtos do catalogo -->
-    <div class="col-12 col-md-6 col-lg-4 mb-4" *ngFor="let obj of lista">
-      
-      <!-- Container principal do cartao de produto -->
-      <div class="card h-100 border-secondary" style="background-color: #1a1a1f; box-shadow: 0 4px 8px rgba(0,0,0,0.5);">
-        
-        <!-- Renderizacao da midia associada ao produto baseada em identificador numerico -->
-        <img [src]="obj.codigo + '.jpg'" class="card-img-top" alt="Capa do jogo" style="height: 220px; object-fit: cover; border-bottom: 1px solid #333;">
-        
-        <div class="card-body d-flex flex-column text-light">
-          <h5 class="card-title fw-bold" style="color: var(--text-main);">{{ obj.nome }}</h5>
-          
-          <!-- Bloco de descricao textual do produto -->
-          <p class="card-text small mb-4" style="color: #a0a0a0; line-height: 1.4;">{{ obj.descritivo }}</p>
-          
-          <!-- Secao inferior dedicada a precificacao e acoes de conversao -->
-          <div class="mt-auto">
-            
-            <!-- Logica condicional para exibicao de valores com desconto financeiro aplicado -->
-            <p class="mb-3" *ngIf="obj.promo > 0">
-              <span class="text-decoration-line-through text-muted me-2">R$ {{ obj.valor | number:'1.2-2' }}</span>
-              <span class="fw-bold fs-4" style="color: var(--rust-red);">R$ {{ obj.promo | number:'1.2-2' }}</span>
-            </p>
-            
-            <!-- Logica condicional para exibicao de valor integral padrao -->
-            <p class="mb-3 fw-bold fs-4" style="color: var(--text-main);" *ngIf="obj.promo <= 0">
-              R$ {{ obj.valor | number:'1.2-2' }}
-            </p>
-            
-            <!-- Grupo de controles interativos do produto -->
-            <div class="d-flex justify-content-between gap-2">
-              <button class="btn btn-outline-secondary w-50 text-light" (click)="verDetalhe(obj)">Ver Detalhes</button>
-              <button class="btn btn-grimdark w-50" *ngIf="obj.quantidade > 0" (click)="adicionarCesta(obj)">Comprar</button>
-              <button class="btn btn-dark border-secondary text-muted w-50" *ngIf="obj.quantidade <= 0" disabled>Esgotado</button>
-            </div>
-            
-          </div>
-
-        </div>
+<!-- Banner de destaques -->
+@if (destaqueAtual(); as jogo) {
+  <section class="hero mb-5" [style.background-image]="fundoDe(jogo)" aria-label="Jogos em destaque">
+    <div class="hero-conteudo p-3 p-md-5">
+      <span class="badge mb-3 hero-badge"><i class="bi bi-stars me-1"></i> Destaque das Criptas</span>
+      <h1 class="display-5 text-white mb-2">{{ jogo.nome }}</h1>
+      <p class="lead text-light mb-3 hero-texto">{{ jogo.descritivo }}</p>
+      <p class="mb-4">
+        @if (jogo.promo > 0) {
+          <span class="preco-antigo me-2">{{ jogo.valor | currency }}</span>
+          <span class="preco-atual fs-3">{{ jogo.promo | currency }}</span>
+          <span class="badge selo-desconto ms-2">-{{ desconto(jogo) }}%</span>
+        } @else {
+          <span class="fs-3 fw-bold text-white">{{ jogo.valor | currency }}</span>
+        }
+      </p>
+      <div class="d-flex flex-wrap gap-2">
+        <button type="button" class="btn btn-grimdark btn-lg px-4" (click)="comprarDestaque(jogo)">
+          <i class="bi bi-cart-plus me-1"></i> Comprar
+        </button>
+        <a [routerLink]="['/detalhe', jogo.codigo]" class="btn btn-outline-light btn-lg px-4">Ver detalhes</a>
       </div>
     </div>
+
+    @if (destaques().length > 1) {
+      <button type="button" class="hero-seta hero-seta-esq" (click)="anteriorDestaque()" aria-label="Destaque anterior">
+        <i class="bi bi-chevron-left"></i>
+      </button>
+      <button type="button" class="hero-seta hero-seta-dir" (click)="proximoDestaque()" aria-label="Próximo destaque">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+      <div class="hero-indicadores">
+        @for (d of destaques(); track d.codigo; let i = $index) {
+          <button type="button" [class.ativo]="i === indiceDestaque()" (click)="irParaDestaque(i)" [attr.aria-label]="'Mostrar ' + d.nome"></button>
+        }
+      </div>
+    }
+  </section>
+}
+
+<!-- Catálogo -->
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4 titulo-secao">
+  <h2 class="m-0 text-white">Catálogo de Sobrevivência</h2>
+
+  <!-- Filtros e ordenação -->
+  <div class="d-flex flex-wrap align-items-center gap-2">
+    <button type="button" class="chip" [class.ativo]="filtro() === 'todos'" (click)="alterarFiltro('todos')">Todos</button>
+    <button type="button" class="chip" [class.ativo]="filtro() === 'promocao'" (click)="alterarFiltro('promocao')">
+      <i class="bi bi-percent"></i> Promoções
+    </button>
+    <button type="button" class="chip" [class.ativo]="filtro() === 'disponiveis'" (click)="alterarFiltro('disponiveis')">Disponíveis</button>
+    <select class="form-select form-select-sm campo-escuro w-auto" aria-label="Ordenar catálogo" (change)="alterarOrdem($event)">
+      <option value="padrao">Ordem padrão</option>
+      <option value="menor">Menor preço</option>
+      <option value="maior">Maior preço</option>
+      <option value="nome">Nome (A-Z)</option>
+    </select>
   </div>
 </div>
+
+@if (carregando()) {
+  <!-- Carregando -->
+  <div class="row">
+    @for (p of placeholders; track p) {
+      <div class="col-12 col-md-6 col-lg-4 mb-4">
+        <div class="esqueleto esqueleto-card"></div>
+      </div>
+    }
+  </div>
+} @else if (erro()) {
+  <!-- Falha ao carregar -->
+  <div class="painel text-center py-5 px-3">
+    <i class="bi bi-plug display-4 icone-ferrugem d-block mb-3"></i>
+    <h4 class="text-white">As criptas estão inacessíveis</h4>
+    <p class="text-muted mb-4">{{ erro() }}</p>
+    <button type="button" class="btn btn-grimdark px-4" (click)="carregar()">
+      <i class="bi bi-arrow-clockwise me-1"></i> Tentar novamente
+    </button>
+  </div>
+} @else {
+  <div class="row">
+    <!-- Cartões dos jogos -->
+    @for (obj of listaExibida(); track obj.codigo) {
+      <div class="col-12 col-md-6 col-lg-4 mb-4">
+        <app-card-jogo [produto]="obj" />
+      </div>
+    } @empty {
+      <div class="col-12 text-center text-muted py-5">
+        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+        Nenhum jogo encontrado com esse filtro.
+      </div>
+    }
+  </div>
+}

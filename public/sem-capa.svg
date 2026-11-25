@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 900" width="600" height="900">
+  <defs>
+    <linearGradient id="fundo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1c1c22"/>
+      <stop offset="1" stop-color="#0a0a0c"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="900" fill="url(#fundo)"/>
+  <rect x="24" y="24" width="552" height="852" fill="none" stroke="#3a1a18" stroke-width="4"/>
+  <g transform="translate(300 380)" fill="none" stroke="#a3302c" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="-60" cy="0" r="52"/>
+    <path d="M -8 0 H 110 M 70 0 V 40 M 100 0 V 30"/>
+  </g>
+  <text x="300" y="560" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="44" fill="#d8d8de" letter-spacing="4">GRIMDARK CAVE</text>
+  <text x="300" y="615" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="28" fill="#8a8a94">Capa indisponível</text>
+</svg>

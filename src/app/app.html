@@ -1,105 +1,130 @@
-<!-- ======================================================= -->
-<!-- CABECALHO PRINCIPAL DA APLICACAO                        -->
-<!-- ======================================================= -->
-<header class="py-3" style="background-color: var(--bg-navbar); border-bottom: 2px solid var(--rust-red);">
-  <div class="container d-flex flex-wrap align-items-center justify-content-between">
-    
-    <!-- Vinculo de redirecionamento para o componente inicial do catalogo -->
+<!-- Cabeçalho -->
+<header class="cabecalho py-3">
+  <div class="container d-flex flex-wrap align-items-center justify-content-between gap-3">
+
+    <!-- Logo -->
     <a routerLink="/inicio" class="d-flex align-items-center text-decoration-none text-white">
-      <img src="logo.png" alt="Logo Grimdark Cave" style="height: 55px; width: auto; object-fit: contain;" class="me-2">
-      <span class="d-none d-sm-inline navbar-brand m-0 p-0" style="color: var(--rust-red);">GRIMDARK CAVE</span>
+      <img src="logo.png" alt="Logo Grimdark Cave" class="logo me-2">
+      <span class="d-none d-sm-inline navbar-brand m-0 p-0">GRIMDARK CAVE</span>
     </a>
 
-    <!-- Formulario de captura textual interligado ao motor de pesquisa global -->
-    <form class="d-flex w-50 mx-3" (ngSubmit)="realizarBusca()">
+    <!-- Busca -->
+    <form class="busca-topo flex-grow-1 mx-lg-3" role="search" (ngSubmit)="realizarBusca()">
       <div class="input-group">
-        <input type="search" [(ngModel)]="termoPesquisa" name="termoPesquisa" class="form-control bg-dark text-white border-secondary" placeholder="Buscar no grimdark..." aria-label="Search">
-        <button class="btn btn-grimdark" type="submit">
+        <input type="search" [(ngModel)]="termoPesquisa" name="termoPesquisa"
+               class="form-control bg-dark text-white border-secondary"
+               placeholder="Buscar no grimdark..." aria-label="Buscar jogos">
+        <button class="btn btn-grimdark" type="submit" aria-label="Pesquisar">
           <i class="bi bi-search"></i>
         </button>
       </div>
     </form>
 
-    <!-- Bloco de navegacao utilitaria e controle de sessoes -->
-    <div class="d-flex align-items-center gap-3">
-      
-      <!-- Controle fixo para redirecionamento ao componente do carrinho -->
-      <a routerLink="/cesta" class="btn btn-dark border-secondary text-light px-3 py-1 text-decoration-none">
-        <i class="bi bi-cart3 fs-5 me-1" style="color: var(--rust-red);"></i>
-        <span>Cesta</span>
+    <!-- Cesta e conta -->
+    <div class="d-flex align-items-center gap-2 gap-md-3">
+
+      <!-- Cesta com contador -->
+      <a routerLink="/cesta" class="btn btn-dark border-secondary text-light px-3 py-1 position-relative" aria-label="Abrir cesta">
+        <i class="bi bi-cart3 fs-5 me-1 icone-ferrugem"></i>
+        <span class="d-none d-md-inline">Cesta</span>
+        @if (cesta.quantidadeTotal() > 0) {
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill contador-cesta">
+            {{ cesta.quantidadeTotal() }}
+          </span>
+        }
       </a>
 
-      <!-- Renderizacao estrutural condicional: Visivel apenas se a sessao for nula -->
-      <ng-container *ngIf="!usuarioLogado">
-        <a routerLink="/login" class="text-white text-decoration-none fs-4" title="Login / Cadastro">
-          <i class="bi bi-person-circle"></i>
+      @if (!sessao.logado()) {
+        <a routerLink="/login" class="btn btn-sm btn-outline-light" title="Login / Cadastro">
+          <i class="bi bi-person-circle me-1"></i> Entrar
         </a>
-      </ng-container>
+      } @else {
+        <!-- Usuário logado -->
+        <span class="small d-none d-md-inline text-muted">
+          <i class="bi bi-person-check-fill icone-ferrugem"></i> {{ sessao.primeiroNome() }}
+        </span>
 
-      <!-- Renderizacao estrutural condicional: Visivel apenas se a sessao estiver ativa -->
-      <ng-container *ngIf="usuarioLogado">
-        <div class="d-flex align-items-center gap-3">
-          
-          <!-- Elemento de confirmacao visual de sessao autenticada -->
-          <span class="text-muted small d-none d-md-inline" style="color: var(--text-muted-grimdark);">
-            <i class="bi bi-person-check-fill" style="color: var(--rust-red);"></i> {{ usuarioLogado }}
-          </span>
-          
-          <!-- Redirecionamento restrito a area logada -->
-          <a routerLink="/biblioteca" class="btn btn-sm btn-outline-light" title="Acessar meu arsenal">
-            <i class="bi bi-collection-play"></i> Biblioteca
+        @if (sessao.admin()) {
+          <a routerLink="/admin" class="btn btn-sm btn-outline-warning" title="Gerenciar catálogo">
+            <i class="bi bi-hammer"></i> <span class="d-none d-lg-inline">Forja</span>
           </a>
+        }
 
-          <!-- Despachante de encerramento de sessao local -->
-          <button class="btn btn-sm btn-outline-danger" (click)="sair()" title="Sair das criptas">
-            <i class="bi bi-box-arrow-right"></i> Sair
-          </button>
-        </div>
-      </ng-container>
+        <a routerLink="/biblioteca" class="btn btn-sm btn-outline-light" title="Acessar meu arsenal">
+          <i class="bi bi-collection-play"></i> <span class="d-none d-lg-inline">Biblioteca</span>
+        </a>
+
+        <button class="btn btn-sm btn-outline-danger" (click)="sair()" title="Sair das criptas">
+          <i class="bi bi-box-arrow-right"></i> <span class="d-none d-lg-inline">Sair</span>
+        </button>
+      }
     </div>
 
   </div>
 </header>
 
-<!-- ======================================================= -->
-<!-- BARRA DE NAVEGACAO INFERIOR E FILTROS DE CATEGORIA      -->
-<!-- ======================================================= -->
-<nav class="py-3" style="background-color: #0a0a0c; border-bottom: 1px solid #1a1a1a; box-shadow: 0 4px 6px rgba(0,0,0,0.5);">
+<!-- Menu de categorias -->
+<nav class="barra-categorias py-3" aria-label="Categorias">
   <div class="container d-flex justify-content-center">
-    <ul class="nav gap-4">
-      
+    <ul class="nav gap-2 gap-md-4 justify-content-center">
       <li class="nav-item">
-        <a routerLink="/inicio" class="nav-link nav-categoria text-uppercase fw-bold">
+        <a routerLink="/inicio" routerLinkActive="active" class="nav-link nav-categoria text-uppercase fw-bold">
           <i class="bi bi-house-door-fill me-1"></i> Início
         </a>
       </li>
-      
-      <!-- Modulos de redirecionamento parametrizado para alimentacao do componente de busca -->
+      <!-- Atalhos de categoria -->
       <li class="nav-item">
-        <a routerLink="/busca" [queryParams]="{categoria: 'Warhammer'}" class="nav-link nav-categoria text-uppercase fw-bold">
+        <a routerLink="/busca" [queryParams]="{ categoria: 'Warhammer' }" routerLinkActive="active" class="nav-link nav-categoria text-uppercase fw-bold">
           <i class="bi bi-hammer me-1"></i> Warhammer
         </a>
       </li>
-      
       <li class="nav-item">
-        <a routerLink="/busca" [queryParams]="{categoria: 'Souls-like'}" class="nav-link nav-categoria text-uppercase fw-bold">
+        <a routerLink="/busca" [queryParams]="{ categoria: 'Souls-like' }" routerLinkActive="active" class="nav-link nav-categoria text-uppercase fw-bold">
           <i class="bi bi-fire me-1"></i> Souls-like
         </a>
       </li>
-      
       <li class="nav-item">
-        <a routerLink="/busca" [queryParams]="{categoria: 'Sci-Fi Horror'}" class="nav-link nav-categoria text-uppercase fw-bold">
+        <a routerLink="/busca" [queryParams]="{ categoria: 'Sci-Fi Horror' }" routerLinkActive="active" class="nav-link nav-categoria text-uppercase fw-bold">
           <i class="bi bi-bug-fill me-1"></i> Sci-Fi Horror
         </a>
       </li>
-      
+      <li class="nav-item">
+        <a routerLink="/busca" [queryParams]="{ categoria: 'Ação Sombria' }" routerLinkActive="active" class="nav-link nav-categoria text-uppercase fw-bold">
+          <i class="bi bi-moon-stars-fill me-1"></i> Ação Sombria
+        </a>
+      </li>
     </ul>
   </div>
 </nav>
 
-<!-- ======================================================= -->
-<!-- RECEPTACULO PARA INJECAO DINAMICA DE ROTAS              -->
-<!-- ======================================================= -->
-<main class="container my-5">
+<!-- Conteúdo da rota -->
+<main class="container my-4 my-md-5">
   <router-outlet></router-outlet>
 </main>
+
+<!-- Rodapé -->
+<footer class="rodape py-4">
+  <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 small">
+    <span>&copy; {{ anoAtual }} <strong class="icone-ferrugem">GRIMDARK CAVE</strong> &middot; Gabriel Medeiros &amp; Fabricio Araujo</span>
+    <span class="text-muted">Projeto acadêmico de Programação Web &middot; Angular + Spring Boot + MySQL</span>
+  </div>
+</footer>
+
+<!-- Notificações -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" aria-live="polite" aria-atomic="false">
+  @for (n of notificacoes.lista(); track n.id) {
+    <div class="toast show toast-grimdark" [class.toast-erro]="n.tipo === 'erro'" [class.toast-sucesso]="n.tipo === 'sucesso'" role="status">
+      <div class="d-flex align-items-start">
+        <div class="toast-body d-flex gap-2">
+          @switch (n.tipo) {
+            @case ('sucesso') { <i class="bi bi-check-circle-fill"></i> }
+            @case ('erro') { <i class="bi bi-exclamation-octagon-fill"></i> }
+            @default { <i class="bi bi-info-circle-fill"></i> }
+          }
+          <span>{{ n.texto }}</span>
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 mt-2 ms-auto" (click)="notificacoes.fechar(n.id)" aria-label="Fechar"></button>
+      </div>
+    </div>
+  }
+</div>

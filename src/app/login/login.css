@@ -1,0 +1,17 @@
+.abas {
+  border-bottom: 2px solid var(--rust-red);
+}
+
+.aba {
+  background: none;
+  border: none;
+}
+
+/* Celular: abas menores para caber lado a lado */
+@media (max-width: 575.98px) {
+  .aba {
+    font-size: 0.95rem !important;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+  }
+}

@@ -1,0 +1,18 @@
+.cartao-chave {
+  border: 1px solid #333;
+}
+
+.capa-chave {
+  height: 180px;
+  object-fit: cover;
+  border-bottom: 2px solid var(--rust-red);
+}
+
+.caixa-chave {
+  background-color: #141417;
+  border: 1px dashed #555;
+}
+
+.chave-texto {
+  letter-spacing: 1px;
+}

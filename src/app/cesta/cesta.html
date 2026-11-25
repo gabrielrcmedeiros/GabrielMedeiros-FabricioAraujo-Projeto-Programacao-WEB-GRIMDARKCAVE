@@ -1,93 +1,106 @@
-<div class="container mt-5 text-light">
-  
-  <h2 class="fw-bold mb-4" style="color: var(--text-main); border-bottom: 2px solid var(--rust-red); padding-bottom: 10px;">
+<div class="text-light">
+
+  <h2 class="fw-bold mb-4 titulo-secao">
     <i class="bi bi-cart4 text-muted me-2"></i> Cesta de Compras
   </h2>
 
-  <!-- Renderizacao do estado vazio caso o carrinho nao contenha itens -->
-  <div class="text-center py-5" *ngIf="itens.length === 0">
-    <i class="bi bi-slash-circle display-1 text-muted mb-3 d-block" style="opacity: 0.3;"></i>
-    <h4 class="text-secondary">{{ mensagem }}</h4>
-    <a routerLink="/inicio" class="btn btn-grimdark mt-4 px-4 py-2 text-uppercase fw-bold">
-      Retornar ao Catálogo
-    </a>
-  </div>
+  @if (cesta.itens().length === 0) {
+    <!-- Cesta vazia -->
+    <div class="text-center py-5">
+      <i class="bi bi-slash-circle display-1 text-muted mb-3 d-block opacity-25"></i>
+      <h4 class="text-secondary">Sua cesta de compras está vazia.</h4>
+      <a routerLink="/inicio" class="btn btn-grimdark mt-4 px-4 py-2 text-uppercase fw-bold">Retornar ao Catálogo</a>
+    </div>
+  } @else {
+    <div class="row">
 
-  <!-- Estrutura de listagem dos produtos inseridos no carrinho -->
-  <div class="row" *ngIf="itens.length > 0">
-    
-    <div class="col-lg-8 mb-4">
-      <div class="card bg-dark text-light shadow-sm" style="border: 1px solid #333;">
-        <div class="card-body p-0">
-          
+      <!-- Itens -->
+      <div class="col-lg-8 mb-4">
+        <div class="painel overflow-hidden">
           <ul class="list-group list-group-flush">
-            <li class="list-group-item bg-dark text-light d-flex justify-content-between align-items-center p-3 border-bottom" style="border-color: #222 !important;" *ngFor="let item of itens">
-              
-              <div class="d-flex align-items-center">
-                <img [src]="item.produto.codigo + '.jpg'" alt="Capa" class="rounded me-3" style="width: 80px; height: 100px; object-fit: cover; border: 1px solid #444;">
-                
-                <div>
-                  <h5 class="fw-bold mb-1">{{ item.produto.nome }}</h5>
-                  <div class="text-muted small mb-2">Unitário: R$ {{ (item.produto.promo > 0 ? item.produto.promo : item.produto.valor) | number:'1.2-2' }}</div>
-                  
-                  <!-- Controles interativos para incremento e decremento de quantidade -->
-                  <div class="d-flex align-items-center mt-1">
-                    
-                    <!-- Controle de decremento com bloqueio condicional para valor minimo -->
-                    <button class="btn btn-sm btn-outline-secondary" style="border-color: #444;" 
-                            (click)="alterarQuantidade(item.produto.codigo, -1)" 
-                            [disabled]="item.quantidade <= 1">
-                      <i class="bi bi-dash"></i>
-                    </button>
-                    
-                    <span class="mx-3 fw-bold">{{ item.quantidade }}</span>
-                    
-                    <!-- Controle de incremento de quantidade -->
-                    <button class="btn btn-sm btn-outline-secondary" style="border-color: #444;" 
-                            (click)="alterarQuantidade(item.produto.codigo, 1)">
-                      <i class="bi bi-plus"></i>
-                    </button>
-                    
+            @for (item of cesta.itens(); track item.produto.codigo) {
+              <li class="list-group-item bg-transparent text-light d-flex flex-wrap justify-content-between align-items-center gap-3 p-3 linha-item">
+
+                <div class="d-flex align-items-center">
+                  <a [routerLink]="['/detalhe', item.produto.codigo]">
+                    <img [src]="imagemDe(item.produto)" [alt]="'Capa de ' + item.produto.nome" class="rounded me-3 miniatura">
+                  </a>
+                  <div>
+                    <h5 class="fw-bold mb-1">{{ item.produto.nome }}</h5>
+                    <div class="text-muted small mb-2">
+                      Unitário: {{ precoAtual(item.produto) | currency }}
+                      @if (item.produto.promo > 0) {
+                        <span class="preco-antigo ms-1">{{ item.produto.valor | currency }}</span>
+                      }
+                    </div>
+
+                    <!-- Quantidade -->
+                    <div class="d-flex flex-wrap align-items-center gap-2 mt-1" role="group" [attr.aria-label]="'Quantidade de ' + item.produto.nome">
+                      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="alterarQuantidade(item, -1)"
+                              [disabled]="item.quantidade <= 1" aria-label="Diminuir quantidade">
+                        <i class="bi bi-dash"></i>
+                      </button>
+                      <span class="mx-2 fw-bold">{{ item.quantidade }}</span>
+                      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="alterarQuantidade(item, 1)"
+                              [disabled]="item.quantidade >= item.produto.quantidade" aria-label="Aumentar quantidade">
+                        <i class="bi bi-plus"></i>
+                      </button>
+                      <span class="small text-muted ms-1">{{ item.produto.quantidade }} em estoque</span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <!-- Exibicao do subtotal do item e acao de remocao integral da linha -->
-              <div class="text-end">
-                <div class="fw-bold fs-5 mb-2" style="color: var(--rust-red);">
-                  R$ {{ item.valorTotal | number:'1.2-2' }}
+                <!-- Subtotal e remoção -->
+                <div class="text-end ms-auto">
+                  <div class="fw-bold fs-5 mb-2 preco-atual">{{ item.valorTotal | currency }}</div>
+                  <button type="button" class="btn btn-sm btn-outline-danger" (click)="removerItem(item)" title="Descartar todas as cópias">
+                    <i class="bi bi-trash3-fill"></i> Remover
+                  </button>
                 </div>
-                <button class="btn btn-sm btn-outline-danger" (click)="removerItem(item.produto.codigo)" title="Descartar todas as cópias">
-                  <i class="bi bi-trash3-fill"></i> Remover
-                </button>
-              </div>
-
-            </li>
+              </li>
+            }
           </ul>
-
         </div>
       </div>
-    </div>
 
-    <!-- Secao de totalizacao e acoes de conclusao da transacao -->
-    <div class="col-lg-4">
-      <div class="p-4 rounded shadow-sm" style="background-color: #0a0a0c; border: 1px solid #333;">
-        <h4 class="fw-bold mb-4 text-uppercase" style="color: #b5b5be;">Resumo da Transação</h4>
-        
-        <div class="d-flex justify-content-between mb-3 fs-5">
-          <span class="text-muted">Total:</span>
-          <span class="fw-bold" style="color: var(--rust-red);">R$ {{ valorCesta | number:'1.2-2' }}</span>
+      <!-- Resumo e finalização -->
+      <div class="col-lg-4">
+        <div class="p-3 p-md-4 painel-escuro shadow-sm">
+          <h4 class="fw-bold mb-4 text-uppercase text-muted">Resumo da Transação</h4>
+
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">Itens:</span>
+            <span>{{ cesta.quantidadeTotal() }}</span>
+          </div>
+          @if (cesta.economia() > 0) {
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-muted">Economia nas promoções:</span>
+              <span class="text-success">- {{ cesta.economia() | currency }}</span>
+            </div>
+          }
+          <div class="d-flex justify-content-between mb-4 fs-5 pt-2 border-top border-secondary">
+            <span class="text-muted">Total:</span>
+            <span class="fw-bold preco-atual">{{ cesta.valorTotal() | currency }}</span>
+          </div>
+
+          @if (!sessao.logado()) {
+            <p class="small text-warning"><i class="bi bi-lock-fill me-1"></i> Você precisará entrar na sua conta para finalizar.</p>
+          }
+
+          <button type="button" class="btn btn-grimdark btn-lg w-100 mb-3 fw-bold text-uppercase" (click)="finalizarCompra()" [disabled]="finalizando()">
+            @if (finalizando()) {
+              <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span> Forjando chaves...
+            } @else {
+              Finalizar Compra
+            }
+          </button>
+
+          <button type="button" class="btn btn-outline-secondary w-100" (click)="limparCesta()" [disabled]="finalizando()">
+            Esvaziar Cesta Completa
+          </button>
         </div>
-
-        <button class="btn btn-grimdark btn-lg w-100 mb-3 fw-bold text-uppercase" (click)="finalizarCompra()">
-          Finalizar Compra
-        </button>
-        
-        <button class="btn btn-outline-secondary w-100" (click)="limparCesta()">
-          Esvaziar Cesta Completa
-        </button>
       </div>
-    </div>
 
-  </div>
+    </div>
+  }
 </div>

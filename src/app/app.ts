@@ -1,43 +1,53 @@
-import { Component, DoCheck } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterOutlet, RouterModule, Router } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { SessaoService } from './services/sessao-service';
+import { CestaService } from './services/cesta-service';
+import { NotificacaoService } from './services/notificacao-service';
 
 @Component({
   selector: 'app-root',
-  standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterModule, FormsModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, FormsModule],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.css',
 })
-export class App implements DoCheck {
-  /* Variaveis reativas encarregadas do armazenamento de metadados da sessao e estado da busca */
+export class App {
+  /* Serviços usados no cabeçalho e nas notificações */
+  protected readonly sessao = inject(SessaoService);
+  protected readonly cesta = inject(CestaService);
+  protected readonly notificacoes = inject(NotificacaoService);
+  private readonly router = inject(Router);
+
   termoPesquisa: string = '';
-  usuarioLogado: string | null = null;
+  readonly anoAtual = new Date().getFullYear();
 
-  /* Inversao de controle com padrao de injecao do provedor de roteamento */
-  constructor(private router: Router) {}
-
-  /* Implementacao de verificador de ciclo continuo (DoCheck) para monitoramento do estado da sessao no armazenamento local */
-  ngDoCheck() {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      this.usuarioLogado = localStorage.getItem('usuarioLogado');
-    }
+  constructor() {
+    /* Troca capas que não carregam pela imagem padrão (exceto a pré-visualização da Forja) */
+    document.addEventListener(
+      'error',
+      (evento) => {
+        const alvo = evento.target;
+        if (alvo instanceof HTMLImageElement && !alvo.classList.contains('preview-capa') && !alvo.dataset['semCapa']) {
+          alvo.dataset['semCapa'] = '1';
+          alvo.src = 'sem-capa.svg';
+        }
+      },
+      true,
+    );
   }
 
-  /* Captura da submissao do relatorio de busca com execucao de parametrizacao e redirecionamento de view */
+  /* Abre a busca com o termo digitado */
   realizarBusca() {
-    if (this.termoPesquisa.trim() !== '') {
-      this.router.navigate(['/busca'], { queryParams: { q: this.termoPesquisa.trim() } });
+    const termo = this.termoPesquisa.trim();
+    if (termo !== '') {
+      this.router.navigate(['/busca'], { queryParams: { q: termo } });
     }
   }
 
-  /* Funcao controladora de desconexao responsavel por remover credenciais da memoria local */
+  /* Encerra a sessão e volta ao catálogo */
   sair() {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      localStorage.removeItem('usuarioLogado');
-    }
-    alert('Operacao concluida: O usuario foi desconectado do sistema.');
+    this.sessao.sair();
+    this.notificacoes.info('Você deixou as criptas. Até a próxima, viajante.');
     this.router.navigate(['/inicio']);
   }
 }

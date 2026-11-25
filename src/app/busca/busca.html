@@ -1,48 +1,48 @@
-<div class="container mt-4 text-light">
-  <!-- Secao de cabecalho: Exibe dinamicamente o termo ou categoria da pesquisa em curso -->
-  <h3 class="mb-4 pb-2" style="border-bottom: 2px solid var(--rust-red);">
-    Pesquisa por: <span style="color: var(--rust-red);">{{ termoExibicao }}</span>
+<div class="text-light">
+  <!-- Termo ou categoria pesquisada -->
+  <h3 class="mb-3 titulo-secao">
+    Pesquisa por: <span class="icone-ferrugem">{{ termoExibicao() }}</span>
+    @if (!carregando() && !erro()) {
+      <small class="text-muted fs-6 ms-2">({{ resultados().length }} resultado(s))</small>
+    }
   </h3>
 
-  <!-- Tratamento de estado vazio: Renderiza um aviso visual caso o filtro nao retorne resultados -->
-  <div class="alert alert-dark border-secondary text-center py-5" *ngIf="resultados.length === 0">
-    <i class="bi bi-search fs-1 text-muted d-block mb-3"></i>
-    <h4>Nenhum artefato encontrado nas criptas.</h4>
-    <p class="text-muted mb-4">Tente buscar por outro termo do universo sombrio.</p>
-    <a routerLink="/inicio" class="btn btn-grimdark px-4">Voltar ao Catálogo</a>
-  </div>
-
-  <!-- Grade de resultados: Itera sobre a matriz de dados e constroi os cartoes dos produtos encontrados -->
-  <div class="row" *ngIf="resultados.length > 0">
-    <div class="col-12 col-md-6 col-lg-4 mb-4" *ngFor="let obj of resultados">
-      <div class="card h-100 border-secondary" style="background-color: #141417; box-shadow: 0 4px 8px rgba(0,0,0,0.5);">
-        
-        <img [src]="obj.codigo + '.jpg'" class="card-img-top" alt="Capa" style="height: 220px; object-fit: cover; border-bottom: 1px solid #333;">
-        
-        <div class="card-body d-flex flex-column text-light">
-          <h5 class="card-title fw-bold" style="color: var(--text-main);">{{ obj.nome }}</h5>
-          <p class="card-text small mb-4" style="color: var(--text-muted-grimdark); line-height: 1.4;">{{ obj.descritivo }}</p>
-          
-          <div class="mt-auto">
-            <!-- Logica condicional para exibicao de preco promocional sublinhando o valor original -->
-            <p class="mb-3" *ngIf="obj.promo > 0">
-              <span class="text-decoration-line-through text-muted me-2">R$ {{ obj.valor | number:'1.2-2' }}</span>
-              <span class="fw-bold fs-4" style="color: var(--rust-red);">R$ {{ obj.promo | number:'1.2-2' }}</span>
-            </p>
-            
-            <!-- Exibicao padrao do valor integral caso nao exista promocao vinculada ao item -->
-            <p class="mb-3 fw-bold fs-4" style="color: var(--text-main);" *ngIf="obj.promo <= 0">
-              R$ {{ obj.valor | number:'1.2-2' }}
-            </p>
-            
-            <div class="d-flex justify-content-between gap-2">
-              <button class="btn btn-outline-secondary w-50 text-light" (click)="verDetalhe(obj)">Ver Detalhes</button>
-              <button class="btn btn-grimdark w-50" *ngIf="obj.quantidade > 0" (click)="adicionarCesta(obj)">Comprar</button>
-            </div>
-          </div>
-
-        </div>
-      </div>
+  <!-- Filtro por categoria -->
+  @if (categorias().length > 0) {
+    <div class="d-flex flex-wrap gap-2 mb-4" aria-label="Filtrar por categoria">
+      <a routerLink="/busca" class="chip" [class.ativo]="categoriaAtiva() === '' && termoExibicao() === 'TODO O CATÁLOGO'">Todas</a>
+      @for (cat of categorias(); track cat) {
+        <a routerLink="/busca" [queryParams]="{ categoria: cat }" class="chip" [class.ativo]="categoriaAtiva() === cat">{{ cat }}</a>
+      }
     </div>
-  </div>
+  }
+
+  @if (carregando()) {
+    <div class="text-center py-5">
+      <div class="spinner-border icone-ferrugem" role="status"><span class="visually-hidden">Carregando...</span></div>
+      <p class="text-muted mt-3">Vasculhando as criptas...</p>
+    </div>
+  } @else if (erro()) {
+    <div class="painel text-center py-5">
+      <i class="bi bi-plug fs-1 icone-ferrugem d-block mb-3"></i>
+      <h4>{{ erro() }}</h4>
+    </div>
+  } @else if (resultados().length === 0) {
+    <!-- Sem resultados -->
+    <div class="painel text-center py-5">
+      <i class="bi bi-search fs-1 text-muted d-block mb-3"></i>
+      <h4>Nenhum artefato encontrado nas criptas.</h4>
+      <p class="text-muted mb-4">Tente buscar por outro termo do universo sombrio.</p>
+      <a routerLink="/inicio" class="btn btn-grimdark px-4">Voltar ao Catálogo</a>
+    </div>
+  } @else {
+    <!-- Resultados -->
+    <div class="row">
+      @for (obj of resultados(); track obj.codigo) {
+        <div class="col-12 col-md-6 col-lg-4 mb-4">
+          <app-card-jogo [produto]="obj" />
+        </div>
+      }
+    </div>
+  }
 </div>

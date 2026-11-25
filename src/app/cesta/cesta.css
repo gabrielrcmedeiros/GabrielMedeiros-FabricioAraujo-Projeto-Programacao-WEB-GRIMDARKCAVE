@@ -1,0 +1,22 @@
+.linha-item {
+  border-color: #222 !important;
+}
+
+.miniatura {
+  width: 80px;
+  height: 100px;
+  object-fit: cover;
+  border: 1px solid #444;
+}
+
+/* Celular: miniatura e título menores */
+@media (max-width: 575.98px) {
+  .miniatura {
+    width: 60px;
+    height: 76px;
+  }
+
+  .linha-item h5 {
+    font-size: 1rem;
+  }
+}
