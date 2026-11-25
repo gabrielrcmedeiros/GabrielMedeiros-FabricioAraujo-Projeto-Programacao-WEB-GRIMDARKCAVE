@@ -29,34 +29,40 @@ GRIMDARKCAVE/
 
 ## Como rodar
 
-### 1. Banco de dados
-Basta ter o **MySQL** rodando em `localhost:3306`. O banco `grimdarkcave` e as tabelas são criados sozinhos na primeira execução.
+### Pré-requisitos
+- **MySQL 8 ou superior** rodando em `localhost:3306`
+- **Java 17 ou superior** (o Maven vem junto no projeto, pelo `mvnw`)
+- **Node.js** (versão LTS)
 
-Usuário e senha usados: `root` / `123456` (iguais aos exemplos da disciplina). Se o seu MySQL usa outra senha, altere em `backend/src/main/resources/application.properties`.
+### 1. Baixar o projeto
+```bash
+git clone https://github.com/gabrielrcmedeiros/GabrielMedeiros-FabricioAraujo-Projeto-Programacao-WEB-GRIMDARKCAVE.git
+```
+Ou use **Code → Download ZIP** no GitHub.
 
-### 2. Back-end (API)
+### 2. Banco de dados
+Não é preciso criar nada: o banco `grimdarkcave`, as tabelas, os 12 jogos e a conta de administrador são criados na primeira execução da API.
+
+A API usa o usuário `root` com a senha `123456`. Se o seu MySQL usa outros dados, altere `spring.datasource.username` e `spring.datasource.password` em `backend/src/main/resources/application.properties`.
+
+### 3. Back-end (porta 8081)
 ```bash
 cd backend
-./mvnw spring-boot:run        # Windows: mvnw.cmd spring-boot:run
+.\mvnw.cmd spring-boot:run     # Windows (PowerShell)
+./mvnw spring-boot:run         # Linux ou macOS
 ```
-Ou abra a pasta `backend` no VS Code / IntelliJ e execute `GrimdarkCaveApplication`.
+Aguarde a mensagem `Started GrimdarkCaveApplication`. Para testar, abra http://localhost:8081/api/produto.
 
-Na primeira subida, a classe `CargaInicial` grava os 12 jogos da P1 e a conta de administrador. Para testar, abra http://localhost:8081/api/produto: deve aparecer o JSON do catálogo.
-
-### 3. Front-end
+### 4. Front-end (porta 4200)
+Em outro terminal, na pasta principal do projeto:
 ```bash
 npm install
-npm start          # ou: ng serve
+npm start
 ```
 Acesse http://localhost:4200.
 
-### Contas
-| Perfil | E-mail | Senha |
-| --- | --- | --- |
-| Administrador (acessa a **Forja**) | `admin@grimdark.com` | `admin123` |
-| Cliente | crie pelo site em *Entrar → Criar conta* | |
-
-> Os usuários da P1 ficavam no `localStorage` e não existem no banco: crie a conta novamente.
+### 5. Views do banco (opcional)
+Com a API já iniciada, execute `backend/views.sql` no MySQL Workbench para criar as views de consulta (`vw_resumo`, `vw_catalogo`, `vw_clientes`, `vw_pedidos`, `vw_chaves` e `vw_vendas_por_jogo`).
 
 ## API REST
 
