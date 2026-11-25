@@ -1,6 +1,6 @@
 # GRIMDARK CAVE
 
-Loja de chaves digitais de jogos sombrios. Projeto de Programação Web (P1 + P2) de **Gabriel Medeiros** e **Fabricio Araujo**.
+Loja de chaves digitais de jogos sombrios. Projeto de Programação Web (P1 + P2) de **Gabriel Medeiros** e **Fabrício Araujo**.
 
 | Camada | Tecnologia |
 | --- | --- |
